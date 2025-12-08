@@ -112,12 +112,12 @@ export default function AdminPage() {
   const handleExportCSV = () => {
     if (participants.length === 0) return
 
-    const headers = ['Name', 'Email', 'Expertise', 'Pledge', 'LinkedIn', 'Website']
+    const headers = ['Name', 'Email', 'Expertise', 'Preferences', 'LinkedIn', 'Website']
     const rows = participants.map(p => [
       p.name,
       p.email,
       p.expertise_level,
-      p.pledge,
+      p.preferences || '',
       p.linkedin_url,
       p.website_url,
     ])
@@ -251,7 +251,7 @@ export default function AdminPage() {
                             Expertise
                           </th>
                           <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Pledge
+                            Preferences
                           </th>
                         </tr>
                       </thead>
@@ -274,7 +274,7 @@ export default function AdminPage() {
                               </span>
                             </td>
                             <td className="px-4 py-3 text-sm text-gray-600 max-w-xs truncate">
-                              {p.pledge}
+                              {p.preferences || '-'}
                             </td>
                           </tr>
                         ))}
