@@ -5,10 +5,12 @@ import { createClient } from '@/lib/supabase'
 import { SecretSantaMatcher } from '@/lib/matching'
 import { useRouter } from 'next/navigation'
 import type { Participant, Assignment } from '@/lib/supabase'
+import SponsorManagement from '@/components/admin/SponsorManagement'
+import GiftManagement from '@/components/admin/GiftManagement'
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'statistics' | 'matching' | 'sponsors'>('statistics')
+  const [activeTab, setActiveTab] = useState<'statistics' | 'matching' | 'sponsors' | 'gifts'>('statistics')
   const [participants, setParticipants] = useState<Participant[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
@@ -165,16 +167,17 @@ export default function AdminPage() {
 
       <div className="card">
         {/* Tabs */}
-        <div className="flex border-b mb-6">
+        <div className="flex border-b mb-6 overflow-x-auto">
           {[
-            { id: 'statistics', label: '📊 Statistics', value: 'statistics' },
-            { id: 'matching', label: '🎲 Matching', value: 'matching' },
-            { id: 'sponsors', label: '💼 Sponsors', value: 'sponsors' },
+            { id: 'statistics', label: 'Statistics', value: 'statistics' },
+            { id: 'sponsors', label: 'Sponsors', value: 'sponsors' },
+            { id: 'gifts', label: 'Gift Pool', value: 'gifts' },
+            { id: 'matching', label: 'Matching', value: 'matching' },
           ].map((tab) => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.value as any)}
-              className={`px-6 py-3 font-semibold transition-colors ${
+              className={`px-6 py-3 font-semibold transition-colors whitespace-nowrap ${
                 activeTab === tab.value
                   ? 'border-b-2 border-primary-600 text-primary-600'
                   : 'text-gray-600 hover:text-gray-900'
@@ -374,28 +377,10 @@ export default function AdminPage() {
         )}
 
         {/* Sponsors Tab */}
-        {activeTab === 'sponsors' && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Sponsor Management</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
-              <p className="text-blue-900 font-medium mb-4">
-                Sponsor management feature coming soon.
-              </p>
-              <p className="text-sm text-blue-700 mb-4">
-                This will allow you to manage event sponsors and their details.
-              </p>
-              <div className="text-left max-w-md mx-auto">
-                <p className="font-semibold text-blue-900 mb-2">Planned Features:</p>
-                <ul className="space-y-1 text-sm text-blue-800">
-                  <li>• Add/Remove sponsors</li>
-                  <li>• Upload sponsor logos</li>
-                  <li>• Manage sponsor tiers (Gold, Silver, Bronze)</li>
-                  <li>• Display sponsors on public pages</li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        )}
+        {activeTab === 'sponsors' && <SponsorManagement />}
+
+        {/* Gifts Tab */}
+        {activeTab === 'gifts' && <GiftManagement />}
       </div>
     </div>
   )

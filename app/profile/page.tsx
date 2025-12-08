@@ -3,11 +3,13 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import type { Participant } from '@/lib/supabase'
+import type { Participant, GiftAssignmentWithDetails } from '@/lib/supabase'
+import { validateParticipantProfile, type ParticipantProfileInput } from '@/lib/validation'
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<Partial<Participant> | null>(null)
+  const [myGift, setMyGift] = useState<GiftAssignmentWithDetails | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -19,7 +21,7 @@ export default function ProfilePage() {
     website_url: '',
     expertise_level: 'Mid' as 'Junior' | 'Mid' | 'Senior',
     bio: '',
-    pledge: '',
+    preferences: '',
     address: '',
     wishlist: [
       { name: '', url: '' },
@@ -61,7 +63,7 @@ export default function ProfilePage() {
           website_url: profileData.website_url || '',
           expertise_level: profileData.expertise_level || 'Mid',
           bio: profileData.bio || '',
-          pledge: profileData.pledge || '',
+          preferences: profileData.preferences || '',
           address: profileData.address || '',
           wishlist: profileData.wishlist || [
             { name: '', url: '' },
@@ -69,6 +71,19 @@ export default function ProfilePage() {
             { name: '', url: '' },
           ],
         })
+      }
+
+      // Load gift assignment
+      try {
+        const giftResponse = await fetch('/api/my-gift')
+        if (giftResponse.ok) {
+          const giftData = await giftResponse.json()
+          if (giftData.success && giftData.data) {
+            setMyGift(giftData.data)
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load gift assignment:', error)
       }
 
       setLoading(false)
@@ -90,17 +105,17 @@ export default function ProfilePage() {
     if (!user?.email) return
 
     try {
-      if (!formData.name) {
-        throw new Error('Name is required')
-      }
+      // Validate with Zod
+      const validation = validateParticipantProfile(formData)
 
-      if (formData.pledge.length < 20) {
-        throw new Error('Please provide a detailed pledge (minimum 20 characters)')
+      if (!validation.success) {
+        const firstError = validation.error.errors[0]
+        throw new Error(firstError.message)
       }
 
       const payload = {
         email: user.email,
-        ...formData,
+        ...validation.data,
       }
 
       const { error } = profile
@@ -116,7 +131,7 @@ export default function ProfilePage() {
 
       setMessage({
         type: 'success',
-        text: '✅ Profile saved successfully!',
+        text: 'Profile saved successfully!',
       })
     } catch (error: any) {
       setMessage({
@@ -125,6 +140,37 @@ export default function ProfilePage() {
       })
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleMarkAsRedeemed = async () => {
+    try {
+      const response = await fetch('/api/my-gift', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'redeemed' }),
+      })
+
+      if (!response.ok) throw new Error('Failed to update status')
+
+      // Reload gift assignment
+      const giftResponse = await fetch('/api/my-gift')
+      if (giftResponse.ok) {
+        const giftData = await giftResponse.json()
+        if (giftData.success && giftData.data) {
+          setMyGift(giftData.data)
+        }
+      }
+
+      setMessage({
+        type: 'success',
+        text: 'Marked as redeemed!',
+      })
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: 'Failed to update status',
+      })
     }
   }
 
@@ -149,14 +195,104 @@ export default function ProfilePage() {
               onClick={() => router.push('/admin')}
               className="btn-secondary"
             >
-              🔑 Admin Panel
+              Admin Panel
             </button>
           )}
           <button onClick={handleSignOut} className="btn-secondary">
-            🚪 Sign Out
+            Sign Out
           </button>
         </div>
       </div>
+
+      {/* My Gift Section */}
+      {myGift && (
+        <div className="card mb-6 bg-gradient-to-r from-red-50 to-green-50 border-2 border-red-200">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">🎁</div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Your Secret Santa Gift!</h2>
+
+              <div className="bg-white rounded-lg p-4 mb-4 shadow-sm">
+                <div className="flex items-center gap-3 mb-3">
+                  <h3 className="text-xl font-semibold text-primary-600">
+                    {myGift.gift.gift_name}
+                  </h3>
+                  <span className="px-3 py-1 bg-primary-100 text-primary-800 rounded-full text-sm font-medium">
+                    {myGift.gift.gift_type}
+                  </span>
+                </div>
+
+                {myGift.gift.gift_description && (
+                  <p className="text-gray-700 mb-3">{myGift.gift.gift_description}</p>
+                )}
+
+                <div className="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                  <span className="font-medium">Sponsored by:</span>
+                  <span className="text-primary-600 font-semibold">
+                    {myGift.gift.sponsor.company_name}
+                  </span>
+                </div>
+
+                {myGift.gift.value_usd && (
+                  <div className="text-sm text-gray-600 mb-3">
+                    Value: <span className="font-semibold">${myGift.gift.value_usd}</span>
+                  </div>
+                )}
+
+                {myGift.redemption_code && (
+                  <div className="bg-gray-50 p-3 rounded border border-gray-200 mb-3">
+                    <div className="text-sm font-medium text-gray-700 mb-1">Redemption Code:</div>
+                    <code className="text-lg font-mono font-bold text-primary-600">
+                      {myGift.redemption_code}
+                    </code>
+                  </div>
+                )}
+
+                {myGift.gift.redemption_instructions && (
+                  <div className="bg-blue-50 p-3 rounded border border-blue-200 mb-3">
+                    <div className="text-sm font-medium text-blue-900 mb-1">How to Redeem:</div>
+                    <p className="text-sm text-blue-800">{myGift.gift.redemption_instructions}</p>
+                  </div>
+                )}
+
+                <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                  <div className="flex items-center gap-2">
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      myGift.status === 'redeemed'
+                        ? 'bg-green-100 text-green-800'
+                        : myGift.status === 'sent'
+                        ? 'bg-blue-100 text-blue-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {myGift.status === 'redeemed' ? '✓ Redeemed' : myGift.status === 'sent' ? 'Sent' : 'Pending'}
+                    </span>
+                  </div>
+
+                  {myGift.status !== 'redeemed' && (
+                    <button
+                      onClick={handleMarkAsRedeemed}
+                      className="btn-primary text-sm"
+                    >
+                      Mark as Redeemed
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {myGift.gift.sponsor.website && (
+                <a
+                  href={myGift.gift.sponsor.website}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-primary-600 hover:text-primary-700 underline"
+                >
+                  Visit {myGift.gift.sponsor.company_name} →
+                </a>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="card space-y-6">
         {/* Professional Info */}
@@ -244,26 +380,26 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* The Pledge */}
+        {/* Gift Preferences */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">2. The Pledge</h2>
+          <h2 className="text-xl font-semibold mb-4">2. Your Gift Preferences</h2>
           <p className="text-sm text-gray-600 mb-3">
-            <strong>Community Rule:</strong> You must pledge a digital gift of value (Audit,
-            Consultation, Tool Access, Dataset, etc).
+            Tell us what kind of SEO tools or services you'd be interested in receiving!
+            Our sponsors contribute gifts to help the SEO community.
           </p>
-          <label htmlFor="pledge" className="label">
-            I pledge to give... * (minimum 20 characters)
+          <label htmlFor="preferences" className="label">
+            What are you interested in? * (minimum 20 characters)
           </label>
           <textarea
-            id="pledge"
-            value={formData.pledge}
-            onChange={(e) => setFormData({ ...formData, pledge: e.target.value })}
+            id="preferences"
+            value={formData.preferences}
+            onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
             className="input"
             rows={4}
             required
-            placeholder="Describe what you'll give to your Secret Santa recipient..."
+            placeholder="E.g., technical SEO audits, keyword research tools, link building services, content optimization..."
           />
-          <p className="text-xs text-gray-500 mt-1">{formData.pledge.length} characters</p>
+          <p className="text-xs text-gray-500 mt-1">{formData.preferences.length} characters</p>
         </div>
 
         {/* Wishlist */}
@@ -337,7 +473,7 @@ export default function ProfilePage() {
             disabled={saving}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {saving ? 'Saving...' : '💾 Save Profile'}
+            {saving ? 'Saving...' : 'Save Profile'}
           </button>
         </div>
 
