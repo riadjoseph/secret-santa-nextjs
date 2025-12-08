@@ -109,7 +109,7 @@ export default function ProfilePage() {
       const validation = validateParticipantProfile(formData)
 
       if (!validation.success) {
-        const firstError = validation.error.errors[0]
+        const firstError = validation.error.issues[0]
         throw new Error(firstError.message)
       }
 

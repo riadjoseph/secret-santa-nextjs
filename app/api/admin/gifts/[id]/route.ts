@@ -21,7 +21,7 @@ export async function PUT(
     const validation = validateGift(body)
     if (!validation.success) {
       return ApiResponse.error(
-        validation.error.errors.map(e => e.message).join(', ')
+        validation.error.issues.map(e => e.message).join(', ')
       )
     }
 

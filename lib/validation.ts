@@ -37,7 +37,7 @@ export const WISHLIST_SUGGESTIONS = [
 export const participantProfileSchema = z.object({
   name: z.string().min(2, 'Name required').max(100, 'Name too long'),
   expertise_level: z.enum(['Junior', 'Mid', 'Senior'], {
-    errorMap: () => ({ message: 'Must select expertise level' }),
+    message: 'Must select expertise level',
   }),
   // Quick preset toggles instead of long text
   gift_preference_preset: z.enum(['sponsored-tool', 'personal-audit', 'learning-resources', 'surprise-me']).optional(),
