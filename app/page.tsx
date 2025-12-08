@@ -1,15 +1,62 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
+import type { Sponsor } from '@/lib/supabase'
+
+type GiftPreview = {
+  id: string
+  gift_name: string
+  gift_type: string
+  sponsor: Sponsor
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [gifts, setGifts] = useState<GiftPreview[]>([])
+  const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const router = useRouter()
   const supabase = createClient()
+
+  useEffect(() => {
+    loadGiftPreviews()
+    loadSponsors()
+  }, [])
+
+  const loadGiftPreviews = async () => {
+    const { data } = await supabase
+      .from('gifts')
+      .select(`
+        id,
+        gift_name,
+        gift_type,
+        sponsor:sponsors!inner(*)
+      `)
+      .eq('status', 'active')
+      .limit(6)
+
+    if (data) {
+      // Transform data to match type (sponsor comes as single object with !inner)
+      const gifts = data.map((g: any) => ({
+        ...g,
+        sponsor: Array.isArray(g.sponsor) ? g.sponsor[0] : g.sponsor
+      }))
+      setGifts(gifts as GiftPreview[])
+    }
+  }
+
+  const loadSponsors = async () => {
+    const { data } = await supabase
+      .from('sponsors')
+      .select('*')
+      .eq('approval_status', 'approved')
+      .order('tier', { ascending: true })
+
+    if (data) setSponsors(data)
+  }
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -49,14 +96,87 @@ export default function LoginPage() {
   })
 
   return (
-    <div className="max-w-md mx-auto mt-12">
-      <div className="card">
-        <div className="text-center mb-6">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome!</h2>
-          <p className="text-gray-600">
-            Sign in to join the SEO Community Secret Santa
-          </p>
+    <div className="max-w-6xl mx-auto mt-8">
+      {/* Hero Section with Gift Preview */}
+      <div className="text-center mb-12">
+        <h1 className="text-5xl font-bold text-gray-900 mb-4">
+          SEO Community Secret Santa 🎁
+        </h1>
+        <p className="text-xl text-gray-700 mb-2">
+          Get amazing gifts from top SEO tool sponsors
+        </p>
+        <p className="text-gray-600">
+          Sign in to participate and receive your gift!
+        </p>
+      </div>
+
+      {/* Sponsor Logos */}
+      {sponsors.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-6">Our Generous Sponsors</h2>
+          <div className="flex flex-wrap justify-center items-center gap-8">
+            {sponsors.map(sponsor => (
+              <div key={sponsor.id} className="flex flex-col items-center">
+                {sponsor.logo_url ? (
+                  <img
+                    src={sponsor.logo_url}
+                    alt={sponsor.company_name}
+                    className="h-12 object-contain mb-2"
+                  />
+                ) : (
+                  <div className="px-6 py-3 bg-gray-100 rounded-lg font-semibold text-gray-800">
+                    {sponsor.company_name}
+                  </div>
+                )}
+                {sponsor.tier && (
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    sponsor.tier === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
+                    sponsor.tier === 'Silver' ? 'bg-gray-100 text-gray-800' :
+                    'bg-orange-100 text-orange-800'
+                  }`}>
+                    {sponsor.tier}
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Gift Preview */}
+      {gifts.length > 0 && (
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-center mb-6">Available Gifts</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {gifts.map(gift => (
+              <div key={gift.id} className="card bg-gradient-to-br from-red-50 to-green-50 border-2 border-red-200">
+                <div className="flex items-start justify-between mb-2">
+                  <h3 className="font-bold text-lg text-gray-900">{gift.gift_name}</h3>
+                  <span className="px-2 py-1 bg-white rounded text-xs text-gray-700">
+                    {gift.gift_type}
+                  </span>
+                </div>
+                <p className="text-sm text-gray-700">
+                  Sponsored by <span className="font-semibold">{gift.sponsor.company_name}</span>
+                </p>
+                <p className="text-xs text-gray-600 mt-2">
+                  🎄 Sign in to see if you'll receive this gift!
+                </p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Login Form */}
+      <div className="max-w-md mx-auto">
+        <div className="card">
+          <div className="text-center mb-6">
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign In to Participate</h2>
+            <p className="text-gray-600">
+              Join the SEO Community Secret Santa
+            </p>
+          </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
@@ -107,6 +227,7 @@ export default function LoginPage() {
             <li>Complete your profile and join the exchange!</li>
           </ol>
         </div>
+      </div>
       </div>
     </div>
   )

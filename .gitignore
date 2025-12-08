@@ -39,3 +39,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+
+# Documentation and migrations (generated)
+SPONSOR-PORTAL-COMPLETE.md
+supabase-sponsor-portal-migration.sql
+supabase-migration.sql

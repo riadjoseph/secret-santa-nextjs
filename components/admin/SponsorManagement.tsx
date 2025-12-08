@@ -87,6 +87,33 @@ export default function SponsorManagement() {
     setShowForm(true)
   }
 
+  const handleApprove = async (id: string, status: 'approved' | 'rejected') => {
+    try {
+      const response = await fetch(`/api/admin/sponsors/${id}/approve`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ approval_status: status }),
+      })
+
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Failed to update approval status')
+      }
+
+      setMessage({
+        type: 'success',
+        text: `Sponsor ${status} successfully!`,
+      })
+
+      loadSponsors()
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.message,
+      })
+    }
+  }
+
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this sponsor?')) return
 
@@ -305,21 +332,50 @@ export default function SponsorManagement() {
                     {sponsor.website}
                   </a>
                 )}
+                <div className="pt-2">
+                  <span className={`inline-block px-2 py-1 rounded text-xs font-medium ${
+                    sponsor.approval_status === 'approved' ? 'bg-green-100 text-green-800' :
+                    sponsor.approval_status === 'rejected' ? 'bg-red-100 text-red-800' :
+                    'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {sponsor.approval_status === 'approved' ? '✓ Approved' :
+                     sponsor.approval_status === 'rejected' ? '✗ Rejected' :
+                     '⏳ Pending Approval'}
+                  </span>
+                </div>
               </div>
 
-              <div className="flex gap-2">
-                <button
-                  onClick={() => handleEdit(sponsor)}
-                  className="btn-secondary text-sm flex-1"
-                >
-                  Edit
-                </button>
-                <button
-                  onClick={() => handleDelete(sponsor.id)}
-                  className="btn-secondary text-sm text-red-600 hover:bg-red-50"
-                >
-                  Delete
-                </button>
+              <div className="space-y-2">
+                {sponsor.approval_status === 'pending' && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleApprove(sponsor.id, 'approved')}
+                      className="btn-primary text-sm flex-1"
+                    >
+                      Approve
+                    </button>
+                    <button
+                      onClick={() => handleApprove(sponsor.id, 'rejected')}
+                      className="btn-secondary text-sm flex-1 text-red-600 hover:bg-red-50"
+                    >
+                      Reject
+                    </button>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleEdit(sponsor)}
+                    className="btn-secondary text-sm flex-1"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDelete(sponsor.id)}
+                    className="btn-secondary text-sm text-red-600 hover:bg-red-50"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
             </div>
           ))}

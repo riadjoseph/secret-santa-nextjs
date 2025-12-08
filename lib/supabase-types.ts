@@ -23,6 +23,10 @@ export type Sponsor = {
   website: string | null
   contact_email: string
   tier: 'Gold' | 'Silver' | 'Bronze' | null
+  user_id: string | null
+  approval_status: 'pending' | 'approved' | 'rejected'
+  approved_at: string | null
+  approved_by: string | null
   created_at: string
 }
 

@@ -83,6 +83,66 @@ export async function requireAuth() {
 }
 
 /**
+ * Get sponsor record for current user
+ * Returns null if user is not linked to a sponsor
+ */
+export async function getSponsorForUser() {
+  const user = await getCurrentUser()
+  if (!user) return null
+
+  const supabase = await createServerSupabaseClient()
+  const { data } = await supabase
+    .from('sponsors')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
+
+  return data
+}
+
+/**
+ * Verify current user is an approved sponsor
+ * Throws error if not authenticated, not a sponsor, or not approved
+ */
+export async function verifySponsor() {
+  const user = await getCurrentUser()
+
+  if (!user) {
+    throw new Error('Authentication required')
+  }
+
+  const supabase = await createServerSupabaseClient()
+  const { data: sponsor, error } = await supabase
+    .from('sponsors')
+    .select('*')
+    .eq('user_id', user.id)
+    .single()
+
+  if (error || !sponsor) {
+    throw new Error('Sponsor account required')
+  }
+
+  if (sponsor.approval_status !== 'approved') {
+    throw new Error('Sponsor account pending approval')
+  }
+
+  return { user, sponsor }
+}
+
+/**
+ * Check if current user is an approved sponsor
+ * Returns boolean without throwing
+ */
+export async function checkIsSponsor(): Promise<boolean> {
+  try {
+    await verifySponsor()
+    return true
+  } catch {
+    return false
+  }
+}
+
+/**
  * API Response helpers
  */
 export const ApiResponse = {
