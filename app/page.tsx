@@ -120,10 +120,10 @@ export default function LoginPage() {
           SEO Community Secret Santa 🎁
         </h1>
         <p className="text-lg sm:text-xl text-gray-700 mb-2">
-          Get amazing gifts from top SEO tool sponsors
+          Join the gift exchange and spread holiday cheer!
         </p>
         <p className="text-gray-600">
-          Sign in to participate and receive your gift!
+          Enter the draw to give and receive - featuring gifts generously sponsored by top SEO tools
         </p>
       </div>
 
@@ -133,23 +133,23 @@ export default function LoginPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
             <div className="text-4xl mb-3">🎯</div>
-            <h3 className="font-bold text-lg mb-2">1. Sign Up</h3>
+            <h3 className="font-bold text-lg mb-2">1. Enter the Draw</h3>
             <p className="text-gray-700 text-sm">
-              Sign in with your email and complete your profile. Tell us about your SEO interests and expertise level.
+              Sign up and complete your profile. Share your SEO interests and what you'd love to receive.
             </p>
           </div>
           <div className="text-center">
             <div className="text-4xl mb-3">🎁</div>
-            <h3 className="font-bold text-lg mb-2">2. Get Matched</h3>
+            <h3 className="font-bold text-lg mb-2">2. We Match You</h3>
             <p className="text-gray-700 text-sm">
-              Our sponsors contribute awesome SEO tools, services, and resources. You'll be matched with a gift from our pool!
+              On reveal day, the system pairs everyone for gift exchange. Choose from gifts generously contributed by our sponsors!
             </p>
           </div>
           <div className="text-center">
             <div className="text-4xl mb-3">🎄</div>
-            <h3 className="font-bold text-lg mb-2">3. Enjoy Your Gift</h3>
+            <h3 className="font-bold text-lg mb-2">3. Give & Receive</h3>
             <p className="text-gray-700 text-sm">
-              Receive your gift with instructions on how to redeem it. Celebrate the season with the SEO community!
+              Exchange gifts with your match and celebrate the holiday season with the SEO community!
             </p>
           </div>
         </div>
