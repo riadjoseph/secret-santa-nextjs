@@ -138,10 +138,7 @@ export default function ProfilePage() {
         throw new Error(firstError.message)
       }
 
-      const payload = {
-        email: user.email,
-        ...validation.data,
-      }
+      const payload = validation.data
 
       const { error } = profile
         ? await supabase
