@@ -14,7 +14,6 @@ type GiftPreview = {
 }
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('')
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [gifts, setGifts] = useState<GiftPreview[]>([])
@@ -82,32 +81,24 @@ export default function LoginPage() {
     if (data) setSponsors(data)
   }
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleLinkedInLogin = async () => {
     setLoading(true)
     setMessage(null)
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email,
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: 'linkedin_oidc',
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
       if (error) throw error
-
-      setMessage({
-        type: 'success',
-        text: `Magic link sent to ${email}! Check your inbox AND spam/junk folder for an email from Supabase. Click the link to sign in.`,
-      })
-      setEmail('')
     } catch (error: any) {
       setMessage({
         type: 'error',
-        text: error.message || 'Failed to send magic link. Please try again.',
+        text: error.message || 'Failed to connect with LinkedIn. Please try again.',
       })
-    } finally {
       setLoading(false)
     }
   }
@@ -335,31 +326,22 @@ export default function LoginPage() {
             </a>
           </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label htmlFor="email" className="label">
-              Email Address
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-              required
-              className="input"
-              disabled={loading}
-            />
-          </div>
-
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Sending...' : '✨ Send Magic Link'}
-          </button>
-        </form>
+        <button
+          onClick={handleLinkedInLogin}
+          disabled={loading}
+          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
+        >
+          {loading ? (
+            'Connecting...'
+          ) : (
+            <>
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+              </svg>
+              Sign in with LinkedIn
+            </>
+          )}
+        </button>
 
         {message && (
           <div
@@ -378,11 +360,10 @@ export default function LoginPage() {
             <strong>How it works:</strong>
           </p>
           <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
-            <li>Enter your email address</li>
-            <li>Check your inbox <strong>and spam/junk folder</strong> for an email from Supabase</li>
-            <li>Click the magic link to sign in securely</li>
-            <li>Complete your profile and join the exchange!</li>
-            <li>Note: You have to enter your email every time you want to sign in.</li>
+            <li>Click "Sign in with LinkedIn" to authenticate securely</li>
+            <li>Authorize SEO Kringle to access your basic LinkedIn profile</li>
+            <li>Complete your profile with wishlist and preferences</li>
+            <li>Join the Secret Santa gift exchange!</li>
           </ol>
         </div>
       </div>
