@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Script from "next/script";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -14,13 +13,6 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <head>
-        <Script
-          src="https://js.hcaptcha.com/1/api.js"
-          async
-          defer
-        />
-      </head>
       <body className="antialiased">
         <div className="min-h-screen flex flex-col">
           <header className="bg-primary-600 text-white py-4 px-6 shadow-lg">
