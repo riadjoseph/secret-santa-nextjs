@@ -20,6 +20,7 @@ export default function LoginPage() {
   const [gifts, setGifts] = useState<GiftPreview[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [timeUntilReveal, setTimeUntilReveal] = useState(getTimeUntilReveal())
+  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const router = useRouter()
   const supabase = createClient()
 
@@ -30,6 +31,18 @@ export default function LoginPage() {
     }, 1000)
 
     return () => clearInterval(interval)
+  }, [])
+
+  // Set up hCaptcha callback
+  useEffect(() => {
+    // Define the callback function globally
+    (window as any).onCaptchaSuccess = (token: string) => {
+      setCaptchaToken(token)
+    }
+
+    return () => {
+      delete (window as any).onCaptchaSuccess
+    }
   }, [])
 
   useEffect(() => {
@@ -88,10 +101,15 @@ export default function LoginPage() {
     setMessage(null)
 
     try {
+      if (!captchaToken) {
+        throw new Error('Please complete the captcha verification')
+      }
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
           emailRedirectTo: `${window.location.origin}/auth/callback`,
+          captchaToken,
         },
       })
 
@@ -102,11 +120,22 @@ export default function LoginPage() {
         text: `Magic link sent to ${email}! Check your inbox AND spam/junk folder for an email from Supabase. Click the link to sign in.`,
       })
       setEmail('')
+      setCaptchaToken(null)
+
+      // Reset hCaptcha widget
+      if (typeof window !== 'undefined' && (window as any).hcaptcha) {
+        (window as any).hcaptcha.reset()
+      }
     } catch (error: any) {
       setMessage({
         type: 'error',
         text: error.message || 'Failed to send magic link. Please try again.',
       })
+      // Reset captcha on error
+      setCaptchaToken(null)
+      if (typeof window !== 'undefined' && (window as any).hcaptcha) {
+        (window as any).hcaptcha.reset()
+      }
     } finally {
       setLoading(false)
     }
@@ -342,9 +371,18 @@ export default function LoginPage() {
             />
           </div>
 
+          {/* hCaptcha Widget */}
+          <div className="flex justify-center">
+            <div
+              className="h-captcha"
+              data-sitekey={process.env.NEXT_PUBLIC_HCAPTCHA_SITE_KEY}
+              data-callback="onCaptchaSuccess"
+            ></div>
+          </div>
+
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !captchaToken}
             className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Sending...' : '✨ Send Magic Link'}
