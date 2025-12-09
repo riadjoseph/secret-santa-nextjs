@@ -96,18 +96,75 @@ export default function LoginPage() {
   })
 
   return (
-    <div className="max-w-6xl mx-auto mt-8">
+    <div className="max-w-6xl mx-auto mt-8 px-4">
       {/* Hero Section with Gift Preview */}
-      <div className="text-center mb-12">
-        <h1 className="text-5xl font-bold text-gray-900 mb-4">
+      <div className="text-center mb-12 px-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           SEO Community Secret Santa 🎁
         </h1>
-        <p className="text-xl text-gray-700 mb-2">
+        <p className="text-lg sm:text-xl text-gray-700 mb-2">
           Get amazing gifts from top SEO tool sponsors
         </p>
         <p className="text-gray-600">
           Sign in to participate and receive your gift!
         </p>
+      </div>
+
+      {/* How It Works Section */}
+      <div className="mb-12 bg-gradient-to-br from-green-50 to-red-50 rounded-lg p-4 sm:p-6 md:p-8 border-2 border-green-200">
+        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">How It Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="text-center">
+            <div className="text-4xl mb-3">🎯</div>
+            <h3 className="font-bold text-lg mb-2">1. Sign Up</h3>
+            <p className="text-gray-700 text-sm">
+              Sign in with your email and complete your profile. Tell us about your SEO interests and expertise level.
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl mb-3">🎁</div>
+            <h3 className="font-bold text-lg mb-2">2. Get Matched</h3>
+            <p className="text-gray-700 text-sm">
+              Our sponsors contribute awesome SEO tools, services, and resources. You'll be matched with a gift from our pool!
+            </p>
+          </div>
+          <div className="text-center">
+            <div className="text-4xl mb-3">🎄</div>
+            <h3 className="font-bold text-lg mb-2">3. Enjoy Your Gift</h3>
+            <p className="text-gray-700 text-sm">
+              Receive your gift with instructions on how to redeem it. Celebrate the season with the SEO community!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* For Sponsors Section */}
+      <div className="mb-12 bg-blue-50 rounded-lg p-4 sm:p-6 border border-blue-200">
+        <div className="max-w-3xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-4">For Sponsors</h2>
+          <p className="text-center text-gray-700 mb-4">
+            Want to give back to the SEO community and showcase your tools or services?
+          </p>
+          <div className="bg-white rounded-lg p-4 mb-4">
+            <h3 className="font-bold mb-2">Sponsor Login</h3>
+            <p className="text-sm text-gray-700 mb-2">
+              If you're an approved sponsor, use the same magic link login above. Once logged in, you'll have access to your sponsor dashboard where you can:
+            </p>
+            <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 ml-2">
+              <li>Add and manage your gift offerings</li>
+              <li>View analytics on gift distribution and redemption</li>
+              <li>Track engagement with your contributions</li>
+            </ul>
+          </div>
+          <div className="text-center">
+            <p className="text-sm text-gray-600 mb-2">
+              Interested in becoming a sponsor?
+            </p>
+            <p className="text-sm text-gray-700">
+              Contact us at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to learn more about sponsorship opportunities.
+            </p>
+          </div>
+        </div>
       </div>
 
       {/* Sponsor Logos */}

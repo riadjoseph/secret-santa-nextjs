@@ -154,8 +154,8 @@ export default function AdminPage() {
   )
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
+    <div className="px-4">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
           <p className="text-sm text-gray-600 mt-1">Logged in as: {user?.email}</p>

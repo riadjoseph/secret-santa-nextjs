@@ -183,7 +183,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto px-4">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Your Profile</h1>
@@ -388,7 +388,7 @@ export default function ProfilePage() {
             Our sponsors contribute gifts to help the SEO community.
           </p>
           <label htmlFor="preferences" className="label">
-            What are you interested in? * (minimum 20 characters)
+            What are you interested in? (Optional)
           </label>
           <textarea
             id="preferences"
@@ -396,16 +396,15 @@ export default function ProfilePage() {
             onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
             className="input"
             rows={4}
-            required
             placeholder="E.g., technical SEO audits, keyword research tools, link building services, content optimization..."
           />
-          <p className="text-xs text-gray-500 mt-1">{formData.preferences.length} characters</p>
+          <p className="text-xs text-gray-500 mt-1">{formData.preferences.length} / 300 characters</p>
         </div>
 
         {/* Wishlist */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">3. Your Wishlist</h2>
-          <p className="text-sm text-gray-600 mb-3">Give your Santa 3 ideas!</p>
+          <h2 className="text-xl font-semibold mb-4">3. Your Wishlist (Optional)</h2>
+          <p className="text-sm text-gray-600 mb-3">Give your Santa up to 3 gift ideas! This is completely optional.</p>
 
           {formData.wishlist.map((item, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">

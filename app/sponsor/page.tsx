@@ -201,9 +201,9 @@ export default function SponsorDashboard() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto">
+    <div className="max-w-6xl mx-auto px-4">
       <div className="mb-6">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
           {sponsor?.company_name} - Sponsor Dashboard
         </h1>
         <p className="text-gray-600">Manage your gifts for the SEO Community Secret Santa</p>
