@@ -43,3 +43,5 @@ Thumbs.db
 # Documentation and migrations (generated)
 *.md
 *.sql
+.claude/settings.local.json
+.claude/settings.local.json
