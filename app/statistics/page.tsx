@@ -13,9 +13,13 @@ export default function StatisticsPage() {
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [gifts, setGifts] = useState<Gift[]>([])
   const [loading, setLoading] = useState(true)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   const router = useRouter()
   const supabase = createClient()
+
+  // Check if user is admin
+  const adminEmails = (process.env.NEXT_PUBLIC_ADMIN_EMAILS || '').split(',').map(e => e.trim())
 
   useEffect(() => {
     async function loadData() {
@@ -27,6 +31,8 @@ export default function StatisticsPage() {
       }
 
       setUser(user)
+      setIsAdmin(adminEmails.includes(user.email || ''))
+
       await Promise.all([
         loadParticipants(),
         loadAssignments(),
@@ -58,18 +64,27 @@ export default function StatisticsPage() {
   }
 
   const loadSponsors = async () => {
-    const response = await fetch('/api/admin/sponsors')
-    if (response.ok) {
-      const data = await response.json()
-      setSponsors(data.data || [])
+    // Load sponsors directly from Supabase (accessible to all authenticated users)
+    const { data, error } = await supabase
+      .from('sponsors')
+      .select('*')
+      .eq('approval_status', 'approved')
+      .order('tier', { ascending: true })
+
+    if (data && !error) {
+      setSponsors(data)
     }
   }
 
   const loadGifts = async () => {
-    const response = await fetch('/api/admin/gifts')
-    if (response.ok) {
-      const data = await response.json()
-      setGifts(data.data || [])
+    // Load gifts directly from Supabase with sponsor info (accessible to all authenticated users)
+    const { data, error } = await supabase
+      .from('gifts')
+      .select('*')
+      .order('created_at', { ascending: false })
+
+    if (data && !error) {
+      setGifts(data)
     }
   }
 
@@ -121,7 +136,7 @@ export default function StatisticsPage() {
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto">
-        {['statistics', 'participants', 'sponsors', 'gifts', 'matching'].map((tab) => (
+        {['statistics', 'participants', 'sponsors', 'gifts', ...(isAdmin ? ['matching'] : [])].map((tab) => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
@@ -257,7 +272,9 @@ export default function StatisticsPage() {
               <thead className="bg-gray-50">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  {isAdmin && (
+                    <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Email</th>
+                  )}
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Expertise</th>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Joined</th>
                 </tr>
@@ -266,7 +283,9 @@ export default function StatisticsPage() {
                 {participants.map((p) => (
                   <tr key={p.id}>
                     <td className="px-4 py-3 text-sm text-gray-900">{p.name || 'N/A'}</td>
-                    <td className="px-4 py-3 text-sm text-gray-600">{p.email}</td>
+                    {isAdmin && (
+                      <td className="px-4 py-3 text-sm text-gray-600">{p.email}</td>
+                    )}
                     <td className="px-4 py-3 text-sm">
                       <span className={`px-2 py-1 rounded text-xs font-medium ${
                         p.expertise_level === 'Senior'
