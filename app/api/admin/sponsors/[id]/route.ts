@@ -25,10 +25,16 @@ export async function PUT(
       )
     }
 
+    // Convert empty tier to null
+    const updateData: any = { ...validation.data }
+    if (updateData.tier === '' || !updateData.tier) {
+      updateData.tier = null
+    }
+
     const supabase = await createAdminClient()
     const { data, error } = await supabase
       .from('sponsors')
-      .update(validation.data)
+      .update(updateData)
       .eq('id', id)
       .select()
       .single()

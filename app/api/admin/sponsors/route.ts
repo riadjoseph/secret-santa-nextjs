@@ -39,7 +39,7 @@ export async function GET() {
 export async function POST(request: NextRequest) {
   try {
     // Verify admin access
-    await verifyAdmin()
+    const admin = await verifyAdmin()
 
     const body = await request.json()
 
@@ -51,10 +51,24 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Prepare data with defaults for admin-created sponsors
+    const sponsorData: any = {
+      ...validation.data,
+      approval_status: 'approved', // Admin-created sponsors are auto-approved
+      approved_by: admin.email,
+      approved_at: new Date().toISOString(),
+      user_id: null, // No user account linked initially
+    }
+
+    // Convert empty tier to null
+    if (sponsorData.tier === '' || !sponsorData.tier) {
+      sponsorData.tier = null
+    }
+
     const supabase = await createAdminClient()
     const { data, error } = await supabase
       .from('sponsors')
-      .insert(validation.data)
+      .insert(sponsorData)
       .select()
       .single()
 
