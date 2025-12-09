@@ -27,7 +27,12 @@ export default function RootLayout({
           </main>
 
           <footer className="bg-gray-100 py-4 px-6 text-center text-sm text-gray-600">
-            <p>SEO Kringle {new Date().getFullYear()} - Community Gift Exchange</p>
+            <p className="mb-2">SEO Kringle {new Date().getFullYear()} - Community Gift Exchange</p>
+            <p>
+              <a href="/privacy-policy" className="text-blue-600 hover:underline">
+                Privacy Policy
+              </a>
+            </p>
           </footer>
         </div>
       </body>

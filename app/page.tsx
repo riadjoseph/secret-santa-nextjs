@@ -325,6 +325,16 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* Privacy Notice */}
+          <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-900 mb-2">
+              <strong>⚠️ Important:</strong> By signing up, your name, email, and profile information will be visible to all participants.
+            </p>
+            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline font-medium">
+              Read our Privacy Policy →
+            </a>
+          </div>
+
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="email" className="label">
