@@ -15,6 +15,8 @@ export default function AdminPage() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
   const [generating, setGenerating] = useState(false)
+  const [sendingEmails, setSendingEmails] = useState(false)
+  const [emailProgress, setEmailProgress] = useState<{ sent: number; total: number; current: string } | null>(null)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const router = useRouter()
@@ -106,6 +108,50 @@ export default function AdminPage() {
       })
     } finally {
       setGenerating(false)
+    }
+  }
+
+  const handleSendEmails = async () => {
+    setSendingEmails(true)
+    setMessage(null)
+    setEmailProgress(null)
+
+    try {
+      // Get pending assignments
+      const pendingAssignments = assignments.filter(a => a.status === 'pending')
+
+      if (pendingAssignments.length === 0) {
+        throw new Error('No pending assignments to send emails for')
+      }
+
+      // Call API to send batch emails
+      const response = await fetch('/api/admin/send-assignment-emails', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        throw new Error(errorData.error || 'Failed to send emails')
+      }
+
+      const result = await response.json()
+
+      setMessage({
+        type: 'success',
+        text: `✅ Sent ${result.sent} emails successfully! ${result.failed > 0 ? `(${result.failed} failed)` : ''}`,
+      })
+
+      // Reload assignments to see updated statuses
+      await loadAssignments()
+    } catch (error: any) {
+      setMessage({
+        type: 'error',
+        text: error.message || 'Failed to send emails',
+      })
+    } finally {
+      setSendingEmails(false)
+      setEmailProgress(null)
     }
   }
 
@@ -297,7 +343,7 @@ export default function AdminPage() {
             <div>
               <h2 className="text-xl font-semibold mb-4">Assignment Management</h2>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                 <button
                   onClick={handleGenerateAssignments}
                   disabled={generating || participants.length < 2}
@@ -307,12 +353,40 @@ export default function AdminPage() {
                 </button>
 
                 <button
+                  onClick={handleSendEmails}
+                  disabled={sendingEmails || assignments.filter(a => a.status === 'pending').length === 0}
+                  className="btn-primary disabled:opacity-50 disabled:cursor-not-allowed bg-green-600 hover:bg-green-700"
+                >
+                  {sendingEmails ? 'Sending Emails...' : '📧 Send Assignment Emails'}
+                </button>
+
+                <button
                   onClick={loadAssignments}
                   className="btn-secondary"
                 >
                   👁️ View Current Assignments
                 </button>
               </div>
+
+              {/* Email Progress */}
+              {emailProgress && (
+                <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="text-sm font-medium text-blue-900">
+                      Sending emails... {emailProgress.sent}/{emailProgress.total}
+                    </span>
+                    <span className="text-xs text-blue-700">
+                      Current: {emailProgress.current}
+                    </span>
+                  </div>
+                  <div className="w-full bg-blue-200 rounded-full h-2">
+                    <div
+                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${(emailProgress.sent / emailProgress.total) * 100}%` }}
+                    ></div>
+                  </div>
+                </div>
+              )}
 
               {message && (
                 <div
@@ -356,7 +430,13 @@ export default function AdminPage() {
                               {a.receiver_email}
                             </td>
                             <td className="px-4 py-3 text-sm">
-                              <span className="px-2 py-1 bg-yellow-100 text-yellow-800 rounded-full text-xs font-medium">
+                              <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                a.status === 'completed'
+                                  ? 'bg-green-100 text-green-800'
+                                  : a.status === 'sent'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : 'bg-yellow-100 text-yellow-800'
+                              }`}>
                                 {a.status}
                               </span>
                             </td>

@@ -67,11 +67,20 @@ export type GiftAssignmentWithDetails = GiftAssignment & {
   participant: Participant
 }
 
-// Legacy type for backward compatibility (will be removed)
+// Peer-to-peer Secret Santa assignments
 export type Assignment = {
   id: string
   giver_email: string
   receiver_email: string
-  status: 'pending' | 'completed'
+  status: 'pending' | 'sent' | 'completed'
+  email_sent: boolean
+  email_sent_at: string | null
   created_at: string
+}
+
+// Assignment with full participant details (for user view)
+export type AssignmentWithParticipants = {
+  assignment: Assignment
+  giving_to: Participant
+  receiving_from: Participant
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import type { Sponsor } from '@/lib/supabase'
+import { CONFIG, getTimeUntilReveal, getRevealDateFormatted } from '@/lib/config'
 
 type GiftPreview = {
   id: string
@@ -18,8 +19,18 @@ export default function LoginPage() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [gifts, setGifts] = useState<GiftPreview[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
+  const [timeUntilReveal, setTimeUntilReveal] = useState(getTimeUntilReveal())
   const router = useRouter()
   const supabase = createClient()
+
+  // Update countdown timer every second
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTimeUntilReveal(getTimeUntilReveal())
+    }, 1000)
+
+    return () => clearInterval(interval)
+  }, [])
 
   useEffect(() => {
     loadGiftPreviews()
@@ -127,6 +138,68 @@ export default function LoginPage() {
         </p>
       </div>
 
+      {/* Countdown Timer to Reveal Date */}
+      <div className="max-w-2xl mx-auto mb-12">
+        {timeUntilReveal ? (
+          <div className="bg-gradient-to-br from-red-50 via-green-50 to-red-50 rounded-lg p-6 sm:p-8 border-2 border-red-200 shadow-lg">
+            <div className="text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                🎄 Secret Santa Reveal In:
+              </h2>
+              <div className="flex justify-center gap-4 sm:gap-6 my-6">
+                <div className="flex flex-col items-center">
+                  <div className="bg-white rounded-lg p-3 sm:p-4 shadow-md min-w-[70px] sm:min-w-[90px]">
+                    <div className="text-3xl sm:text-4xl font-bold text-red-600">
+                      {timeUntilReveal.days}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                      {timeUntilReveal.days === 1 ? 'Day' : 'Days'}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="bg-white rounded-lg p-3 sm:p-4 shadow-md min-w-[70px] sm:min-w-[90px]">
+                    <div className="text-3xl sm:text-4xl font-bold text-green-600">
+                      {timeUntilReveal.hours}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                      {timeUntilReveal.hours === 1 ? 'Hour' : 'Hours'}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex flex-col items-center">
+                  <div className="bg-white rounded-lg p-3 sm:p-4 shadow-md min-w-[70px] sm:min-w-[90px]">
+                    <div className="text-3xl sm:text-4xl font-bold text-red-600">
+                      {timeUntilReveal.minutes}
+                    </div>
+                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                      {timeUntilReveal.minutes === 1 ? 'Min' : 'Mins'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <p className="text-sm sm:text-base text-gray-700 font-medium">
+                ⏰ Mark your calendar: <span className="font-bold text-red-700">{getRevealDateFormatted()}</span>
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="bg-gradient-to-br from-green-100 to-red-100 rounded-lg p-6 sm:p-8 border-2 border-green-300 shadow-lg">
+            <div className="text-center">
+              <h2 className="text-2xl sm:text-3xl font-bold text-green-800 mb-3">
+                🎅 Matching Revealed!
+              </h2>
+              <p className="text-lg text-gray-800 mb-4">
+                Secret Santa assignments are now available!
+              </p>
+              <p className="text-base text-gray-700">
+                Log in to see who you're matched with and start spreading holiday cheer! 🎁
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+
       {/* How It Works Section */}
       <div className="mb-12 bg-gradient-to-br from-green-50 to-red-50 rounded-lg p-4 sm:p-6 md:p-8 border-2 border-green-200">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">How It Works</h2>
@@ -165,7 +238,7 @@ export default function LoginPage() {
           <div className="bg-white rounded-lg p-4 mb-4">
             <h3 className="font-bold mb-2">Sponsor Login</h3>
             <p className="text-sm text-gray-700 mb-2">
-              If you're an approved sponsor, use the same magic link login above. Once logged in, you'll have access to your sponsor dashboard where you can:
+              If you're an approved sponsor, use the magic link login below. Once logged in, you'll have access to your sponsor dashboard where you can:
             </p>
             <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 ml-2">
               <li>Add and manage your gift offerings</li>
@@ -178,7 +251,7 @@ export default function LoginPage() {
               Interested in becoming a sponsor?
             </p>
             <p className="text-sm text-gray-700">
-              Contact us at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to learn more about sponsorship opportunities.
+              Contact me at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to get started; it is free of charge obviously (you are already very generous)!
             </p>
           </div>
         </div>
@@ -299,6 +372,7 @@ export default function LoginPage() {
             <li>Check your inbox <strong>and spam/junk folder</strong> for an email from Supabase</li>
             <li>Click the magic link to sign in securely</li>
             <li>Complete your profile and join the exchange!</li>
+            <li>Note: You have to enter your email every time you want to sign in.</li>
           </ol>
         </div>
       </div>
