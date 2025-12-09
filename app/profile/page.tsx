@@ -20,6 +20,7 @@ export default function ProfilePage() {
 
   const [formData, setFormData] = useState({
     name: '',
+    email: '',
     linkedin_url: '',
     website_url: '',
     expertise_level: 'Mid' as 'Junior' | 'Mid' | 'Senior',
@@ -59,6 +60,7 @@ export default function ProfilePage() {
         setProfile(profileData)
         setFormData({
           name: profileData.name || '',
+          email: profileData.email || user.email || '',
           linkedin_url: profileData.linkedin_url || '',
           website_url: profileData.website_url || '',
           expertise_level: profileData.expertise_level || 'Mid',
@@ -68,6 +70,9 @@ export default function ProfilePage() {
             { name: '', url: '' },
           ],
         })
+      } else {
+        // Set email from user auth if no profile exists yet
+        setFormData(prev => ({ ...prev, email: user.email || '' }))
       }
 
       // Load gift assignment
@@ -457,6 +462,23 @@ export default function ProfilePage() {
                 className="input"
                 required
               />
+            </div>
+
+            <div>
+              <label htmlFor="email" className="label">
+                Email Address *
+              </label>
+              <input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="input"
+                required
+              />
+              <p className="text-xs text-gray-600 mt-1">
+                Your email may be used to communicate with you about the Secret Santa exchange.
+              </p>
             </div>
 
             <div>

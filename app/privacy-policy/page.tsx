@@ -145,7 +145,7 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">7. Children's Privacy</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">7. NOT FOR UNDER 18 </h2>
             <p className="mb-4">
               SEO Kringle is not intended for individuals under the age of 18. We do not knowingly collect information
               from children under 18. If you are under 18, please do not use this service.
@@ -153,11 +153,11 @@ export default function PrivacyPolicyPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-bold text-gray-900 mb-3">8. International Users</h2>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">8. Data Storage</h2>
             <p className="mb-4">
-              SEO Kringle is operated from the United States. If you are accessing our service from outside the United States,
+              SEO Kringle uses services based in the United States. If you are accessing our service from outside the United States,
               please be aware that your information may be transferred to, stored, and processed in the United States and other
-              countries where our service providers operate.
+              countries where the said service providers operate.
             </p>
           </section>
 

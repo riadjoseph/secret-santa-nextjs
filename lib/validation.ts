@@ -36,6 +36,7 @@ export const WISHLIST_SUGGESTIONS = [
 // Streamlined participant profile schema (minimal required fields)
 export const participantProfileSchema = z.object({
   name: z.string().min(2, 'Name required').max(100, 'Name too long'),
+  email: z.string().email('Valid email required'),
   expertise_level: z.enum(['Junior', 'Mid', 'Senior'], {
     message: 'Must select expertise level',
   }),
