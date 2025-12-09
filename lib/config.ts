@@ -20,7 +20,7 @@ export const CONFIG = {
   /**
    * Application URL for email links
    */
-  APP_URL: process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
+  APP_URL: process.env.NEXT_PUBLIC_APP_DOMAIN || process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000',
   APP_NAME: 'SEO Community Secret Santa',
 } as const
 
