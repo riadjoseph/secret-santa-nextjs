@@ -12,7 +12,7 @@ export async function GET() {
     // Verify admin access
     await verifyAdmin()
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('sponsors')
       .select('*')
@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
       sponsorData.tier = null
     }
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('sponsors')
       .insert(sponsorData)

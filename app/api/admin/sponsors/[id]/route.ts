@@ -31,7 +31,7 @@ export async function PUT(
       updateData.tier = null
     }
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('sponsors')
       .update(updateData)
@@ -67,7 +67,7 @@ export async function DELETE(
 
     const { id } = await params
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { error } = await supabase
       .from('sponsors')
       .delete()

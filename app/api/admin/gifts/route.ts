@@ -11,7 +11,7 @@ export async function GET() {
   try {
     await verifyAdmin()
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('gifts')
       .select(`
@@ -52,7 +52,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('gifts')
       .insert(validation.data)

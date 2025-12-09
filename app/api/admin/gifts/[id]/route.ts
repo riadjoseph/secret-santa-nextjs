@@ -25,7 +25,7 @@ export async function PUT(
       )
     }
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('gifts')
       .update(validation.data)
@@ -64,7 +64,7 @@ export async function DELETE(
 
     const { id } = await params
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
     const { error } = await supabase
       .from('gifts')
       .delete()

@@ -20,7 +20,7 @@ export async function POST(
       return ApiResponse.error('Invalid approval status')
     }
 
-    const supabase = await createAdminClient()
+    const supabase = createAdminClient()
 
     const updateData: any = {
       approval_status,
