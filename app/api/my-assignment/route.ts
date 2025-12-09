@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createServerSupabaseClient } from '@/lib/supabase-server'
 import { isAfterRevealDate } from '@/lib/config'
-import type { AssignmentWithParticipants } from '@/lib/supabase-types'
+import type { GiftAssignmentWithDetails } from '@/lib/supabase-types'
 
 /**
  * GET /api/my-assignment
@@ -21,19 +21,9 @@ export async function GET(request: NextRequest) {
       )
     }
 
-    // Check if reveal date has passed
-    if (!isAfterRevealDate()) {
-      return NextResponse.json(
-        {
-          error: 'Assignments not yet revealed',
-          revealed: false,
-          message: 'Secret Santa assignments will be revealed on December 29, 2025'
-        },
-        { status: 403 }
-      )
-    }
+    const isRevealed = isAfterRevealDate()
 
-    // Get assignment where user is the giver
+    // Get assignment where user is the giver (always show to giver)
     const { data: givingAssignment, error: givingError } = await supabase
       .from('assignments')
       .select(`
@@ -47,18 +37,46 @@ export async function GET(request: NextRequest) {
       console.error('Error fetching giving assignment:', givingError)
     }
 
-    // Get assignment where user is the receiver
-    const { data: receivingAssignment, error: receivingError } = await supabase
-      .from('assignments')
-      .select(`
-        *,
-        giver:participants!assignments_giver_email_fkey(*)
-      `)
-      .eq('receiver_email', user.email)
-      .single()
+    let selectedGift: GiftAssignmentWithDetails | null = null
 
-    if (receivingError) {
-      console.error('Error fetching receiving assignment:', receivingError)
+    if (givingAssignment?.receiver_email) {
+      const { data: giftAssignment, error: giftAssignmentError } = await supabase
+        .from('gift_assignments')
+        .select(`
+          *,
+          gift:gifts(
+            *,
+            sponsor:sponsors(*)
+          )
+        `)
+        .eq('participant_email', givingAssignment.receiver_email)
+        .eq('given_by', user.email)
+        .maybeSingle()
+
+      if (giftAssignmentError && giftAssignmentError.code !== 'PGRST116') {
+        console.error('Error fetching selected gift:', giftAssignmentError)
+      } else if (giftAssignment) {
+        selectedGift = giftAssignment as GiftAssignmentWithDetails
+      }
+    }
+
+    // Get assignment where user is the receiver (only after reveal date)
+    let receivingAssignment = null
+    if (isRevealed) {
+      const { data, error: receivingError } = await supabase
+        .from('assignments')
+        .select(`
+          *,
+          giver:participants!assignments_giver_email_fkey(*)
+        `)
+        .eq('receiver_email', user.email)
+        .single()
+
+      if (receivingError) {
+        console.error('Error fetching receiving assignment:', receivingError)
+      } else {
+        receivingAssignment = data
+      }
     }
 
     // If no assignments found at all
@@ -77,6 +95,7 @@ export async function GET(request: NextRequest) {
       giving_to?: any
       receiving_from?: any
       assignment?: any
+      selected_gift?: GiftAssignmentWithDetails | null
     } = {}
 
     if (givingAssignment) {
@@ -88,6 +107,7 @@ export async function GET(request: NextRequest) {
         status: givingAssignment.status,
         created_at: givingAssignment.created_at,
       }
+      response.selected_gift = selectedGift
     }
 
     if (receivingAssignment) {

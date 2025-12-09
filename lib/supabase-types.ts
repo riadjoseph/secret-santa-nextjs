@@ -55,10 +55,12 @@ export type GiftAssignment = {
   id: string
   gift_id: string
   participant_email: string
+  given_by: string | null // Email of the Secret Santa who chose this gift
   redemption_code: string | null
   redeemed_at: string | null
   status: 'pending' | 'sent' | 'redeemed'
   created_at: string
+  updated_at: string | null
 }
 
 // Assignment with full gift and sponsor details

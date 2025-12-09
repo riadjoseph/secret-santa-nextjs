@@ -3,16 +3,32 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import type { Participant, GiftAssignmentWithDetails, Sponsor } from '@/lib/supabase'
-import { validateParticipantProfile, type ParticipantProfileInput } from '@/lib/validation'
+import type { Participant, GiftAssignmentWithDetails, Sponsor, GiftWithSponsor } from '@/lib/supabase'
+import { validateParticipantProfile } from '@/lib/validation'
 import { getTimeUntilReveal, getRevealDateFormatted } from '@/lib/config'
+
+type AssignmentResponse = {
+  giving_to?: Participant
+  receiving_from?: Participant
+  assignment?: {
+    id: string
+    status: string
+    created_at: string
+  }
+  selected_gift?: GiftAssignmentWithDetails | null
+}
+
+type AvailableGift = GiftWithSponsor & { remaining: number }
 
 export default function ProfilePage() {
   const [user, setUser] = useState<any>(null)
   const [profile, setProfile] = useState<Partial<Participant> | null>(null)
   const [myGift, setMyGift] = useState<GiftAssignmentWithDetails | null>(null)
-  const [myAssignment, setMyAssignment] = useState<{giving_to?: Participant, receiving_from?: Participant} | null>(null)
+  const [myAssignment, setMyAssignment] = useState<AssignmentResponse | null>(null)
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
+  const [availableGifts, setAvailableGifts] = useState<AvailableGift[]>([])
+  const [assigningGiftId, setAssigningGiftId] = useState<string | null>(null)
+  const [giftSelectionMessage, setGiftSelectionMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
   const [timeUntilReveal, setTimeUntilReveal] = useState(getTimeUntilReveal())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -34,6 +50,69 @@ export default function ProfilePage() {
 
   const router = useRouter()
   const supabase = createClient()
+
+  const loadMyGiftData = async () => {
+    try {
+      const giftResponse = await fetch('/api/my-gift')
+      if (!giftResponse.ok) {
+        setMyGift(null)
+        return
+      }
+
+      const giftData = await giftResponse.json()
+      if (giftData.success && giftData.data) {
+        setMyGift(giftData.data)
+      } else {
+        setMyGift(null)
+      }
+    } catch (error) {
+      console.error('Failed to load gift assignment:', error)
+      setMyGift(null)
+    }
+  }
+
+  const loadAssignmentData = async (): Promise<boolean> => {
+    try {
+      const assignmentResponse = await fetch('/api/my-assignment')
+      if (!assignmentResponse.ok) {
+        setMyAssignment(null)
+        return false
+      }
+
+      const assignmentData = await assignmentResponse.json()
+      if (assignmentData.giving_to || assignmentData.receiving_from) {
+        setMyAssignment(assignmentData)
+        return Boolean(assignmentData.giving_to)
+      }
+
+      setMyAssignment(null)
+      return false
+    } catch (error) {
+      console.error('Assignment not yet available:', error)
+      setMyAssignment(null)
+      return false
+    }
+  }
+
+  const loadAvailableSponsorGifts = async () => {
+    try {
+      const response = await fetch('/api/gifts/available')
+      if (!response.ok) {
+        setAvailableGifts([])
+        return
+      }
+
+      const data = await response.json()
+      if (data.success) {
+        setAvailableGifts((data.data || []) as AvailableGift[])
+      } else {
+        setAvailableGifts([])
+      }
+    } catch (error) {
+      console.error('Failed to load available gifts:', error)
+      setAvailableGifts([])
+    }
+  }
 
   useEffect(() => {
     async function loadUserAndProfile() {
@@ -76,31 +155,12 @@ export default function ProfilePage() {
         setFormData(prev => ({ ...prev, email: user.email || '' }))
       }
 
-      // Load gift assignment
-      try {
-        const giftResponse = await fetch('/api/my-gift')
-        if (giftResponse.ok) {
-          const giftData = await giftResponse.json()
-          if (giftData.success && giftData.data) {
-            setMyGift(giftData.data)
-          }
-        }
-      } catch (error) {
-        console.error('Failed to load gift assignment:', error)
-      }
-
-      // Load Secret Santa assignment
-      try {
-        const assignmentResponse = await fetch('/api/my-assignment')
-        if (assignmentResponse.ok) {
-          const assignmentData = await assignmentResponse.json()
-          if (assignmentData.giving_to || assignmentData.receiving_from) {
-            setMyAssignment(assignmentData)
-          }
-        }
-      } catch (error) {
-        // Silently fail - assignments may not be revealed yet or user may not be matched
-        console.log('Assignment not yet available:', error)
+      await loadMyGiftData()
+      const hasGivingAssignment = await loadAssignmentData()
+      if (hasGivingAssignment) {
+        await loadAvailableSponsorGifts()
+      } else {
+        setAvailableGifts([])
       }
 
       // Load sponsors
@@ -183,6 +243,51 @@ export default function ProfilePage() {
     }
   }
 
+  const handleAssignGift = async (giftId: string) => {
+    if (!myAssignment?.giving_to?.email) {
+      setGiftSelectionMessage({
+        type: 'error',
+        text: 'You do not have an assigned recipient yet.',
+      })
+      return
+    }
+
+    setAssigningGiftId(giftId)
+    setGiftSelectionMessage(null)
+
+    try {
+      const response = await fetch('/api/assign-gift', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          gift_id: giftId,
+          receiver_email: myAssignment.giving_to.email,
+        }),
+      })
+
+      const data = await response.json().catch(() => ({}))
+
+      if (!response.ok) {
+        throw new Error(data.error || 'Failed to assign gift')
+      }
+
+      setGiftSelectionMessage({
+        type: 'success',
+        text: data.message || 'Gift assigned successfully!',
+      })
+
+      await loadAssignmentData()
+      await loadAvailableSponsorGifts()
+    } catch (error: any) {
+      setGiftSelectionMessage({
+        type: 'error',
+        text: error.message || 'Failed to assign gift. Please try again.',
+      })
+    } finally {
+      setAssigningGiftId(null)
+    }
+  }
+
   const handleMarkAsRedeemed = async () => {
     try {
       const response = await fetch('/api/my-gift', {
@@ -257,15 +362,186 @@ export default function ProfilePage() {
       </div>
 
       {/* Secret Santa Assignment Section */}
-      {timeUntilReveal ? (
+      {myAssignment?.giving_to && (
+        <div className="card mb-6 bg-gradient-to-r from-green-50 to-red-50 border-2 border-green-300">
+          <div className="flex items-start gap-4">
+            <div className="text-4xl">🎁</div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">You're gifting to</h2>
+
+              <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border-l-4 border-green-500">
+                <p className="text-xl font-semibold text-gray-900 mb-3">{myAssignment.giving_to.name}</p>
+
+                <div className="space-y-2 text-sm">
+                  <p>
+                    <span className="font-medium text-gray-700">Expertise:</span>{' '}
+                    <span className="text-gray-900">{myAssignment.giving_to.expertise_level}</span>
+                  </p>
+
+                  {myAssignment.giving_to.wishlist && myAssignment.giving_to.wishlist.length > 0 && (
+                    <div>
+                      <p className="font-medium text-gray-700 mb-1">Wishlist:</p>
+                      <ul className="list-disc list-inside ml-2 space-y-1">
+                        {myAssignment.giving_to.wishlist
+                          .filter(item => item.name && item.name.trim() !== '')
+                          .map((item, idx) => (
+                            <li key={idx} className="text-gray-800">
+                              {item.name}
+                              {item.url && item.url.trim() !== '' && (
+                                <a
+                                  href={item.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-blue-600 hover:underline ml-2"
+                                >
+                                  ↗
+                                </a>
+                              )}
+                            </li>
+                          ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {myAssignment.giving_to.linkedin_url && (
+                    <p>
+                      <span className="font-medium text-gray-700">LinkedIn:</span>{' '}
+                      <a
+                        href={myAssignment.giving_to.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        View Profile ↗
+                      </a>
+                    </p>
+                  )}
+
+                  {myAssignment.giving_to.website_url && (
+                    <p>
+                      <span className="font-medium text-gray-700">Website:</span>{' '}
+                      <a
+                        href={myAssignment.giving_to.website_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-blue-600 hover:underline"
+                      >
+                        Visit Site ↗
+                      </a>
+                    </p>
+                  )}
+                </div>
+
+                <button
+                  onClick={() => router.push('/community')}
+                  className="mt-4 btn-primary text-sm"
+                >
+                  View Full Profile in Community
+                </button>
+              </div>
+
+              {myAssignment.selected_gift && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-medium text-green-800 mb-1">Reserved gift</p>
+                  <p className="text-lg font-semibold text-green-900">
+                    {myAssignment.selected_gift.gift.gift_name}
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Sponsored by {myAssignment.selected_gift.gift.sponsor.company_name}. You can change this selection anytime before reveal day.
+                  </p>
+                </div>
+              )}
+
+              <div className="mt-2">
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">Choose a sponsor gift</h3>
+                <p className="text-sm text-gray-600 mb-3">
+                  Select a gift from our sponsor pool. Your recipient will unlock it on reveal day and redeem it directly with the sponsor.
+                </p>
+
+                {giftSelectionMessage && (
+                  <div
+                    className={`p-3 rounded-lg mb-3 ${
+                      giftSelectionMessage.type === 'success'
+                        ? 'bg-green-50 text-green-800 border border-green-200'
+                        : 'bg-red-50 text-red-800 border border-red-200'
+                    }`}
+                  >
+                    {giftSelectionMessage.text}
+                  </div>
+                )}
+
+                {availableGifts.length > 0 ? (
+                  <div className="space-y-3">
+                    {availableGifts.map((gift) => {
+                      const isSelected = myAssignment.selected_gift?.gift_id === gift.id
+                      return (
+                        <div key={gift.id} className="border border-gray-200 rounded-lg p-4 bg-white shadow-sm">
+                          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                            <div>
+                              <div className="flex items-center gap-2 mb-1">
+                                <p className="text-lg font-semibold text-gray-900">{gift.gift_name}</p>
+                                <span className="px-2 py-1 rounded-full text-xs font-semibold bg-primary-100 text-primary-800 uppercase">
+                                  {gift.gift_type}
+                                </span>
+                              </div>
+                              {gift.gift_description && (
+                                <p className="text-sm text-gray-600 mb-2">{gift.gift_description}</p>
+                              )}
+                              <p className="text-sm text-gray-600">
+                                Sponsored by{' '}
+                                <span className="font-semibold text-gray-900">
+                                  {gift.sponsor.company_name}
+                                </span>
+                                {gift.value_usd && (
+                                  <span className="text-gray-500"> • ${gift.value_usd}</span>
+                                )}
+                              </p>
+                              <p className="text-xs text-gray-500 mt-1">{gift.remaining} gifts remaining</p>
+                            </div>
+                            <div className="flex flex-col gap-2 min-w-[180px]">
+                              <button
+                                type="button"
+                                onClick={() => handleAssignGift(gift.id)}
+                                disabled={assigningGiftId === gift.id || isSelected}
+                                className={`btn-primary text-sm ${
+                                  isSelected ? 'opacity-70 cursor-default' : ''
+                                }`}
+                              >
+                                {isSelected
+                                  ? 'Selected'
+                                  : assigningGiftId === gift.id
+                                  ? 'Assigning...'
+                                  : 'Assign Gift'}
+                              </button>
+                              <p className="text-xs text-gray-500 text-right">
+                                {gift.redemption_instructions ? 'Includes redemption instructions' : '\u00A0'}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                ) : (
+                  <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 text-sm text-gray-600">
+                    No sponsor gifts are available right now. Check back soon as new partners add gifts regularly.
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {timeUntilReveal && (
         <div className="card mb-6 bg-gradient-to-r from-red-50 via-white to-green-50 border-2 border-red-200">
           <div className="flex items-start gap-4">
             <div className="text-4xl">🎅</div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Secret Santa Assignment</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Secret Santa Reveal Countdown</h2>
               <div className="bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
                 <p className="text-lg font-medium text-gray-800 mb-2">
-                  Your Secret Santa match will be revealed on:
+                  You'll discover who is gifting you on:
                 </p>
                 <p className="text-xl font-bold text-red-600 mb-4">{getRevealDateFormatted()}</p>
                 <div className="flex gap-4 justify-center mb-3">
@@ -283,80 +559,26 @@ export default function ProfilePage() {
                   </div>
                 </div>
                 <p className="text-sm text-gray-600">
-                  In the meantime, complete your profile to help your Secret Santa choose the perfect gift for you!
+                  Finish your profile and wishlist so your Secret Santa picks the perfect gift.
                 </p>
               </div>
             </div>
           </div>
         </div>
-      ) : myAssignment && (
-        <div className="card mb-6 bg-gradient-to-r from-green-50 to-red-50 border-2 border-green-300">
+      )}
+
+      {!timeUntilReveal && myAssignment?.receiving_from && (
+        <div className="card mb-6 bg-gradient-to-r from-yellow-50 to-red-50 border-2 border-yellow-200">
           <div className="flex items-start gap-4">
-            <div className="text-4xl">🎁</div>
+            <div className="text-4xl">🎉</div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Your Secret Santa Match!</h2>
-
-              {myAssignment.giving_to && (
-                <div className="bg-white rounded-lg p-4 mb-4 shadow-sm border-l-4 border-green-500">
-                  <h3 className="text-lg font-bold text-green-700 mb-2">🎅 You're giving to:</h3>
-                  <p className="text-xl font-semibold text-gray-900 mb-3">{myAssignment.giving_to.name}</p>
-
-                  <div className="space-y-2 text-sm">
-                    <p><span className="font-medium text-gray-700">Expertise:</span> <span className="text-gray-900">{myAssignment.giving_to.expertise_level}</span></p>
-
-                    {myAssignment.giving_to.wishlist && myAssignment.giving_to.wishlist.length > 0 && (
-                      <div>
-                        <p className="font-medium text-gray-700 mb-1">Wishlist:</p>
-                        <ul className="list-disc list-inside ml-2 space-y-1">
-                          {myAssignment.giving_to.wishlist.filter(item => item.name && item.name.trim() !== '').map((item, idx) => (
-                            <li key={idx} className="text-gray-800">
-                              {item.name}
-                              {item.url && item.url.trim() !== '' && (
-                                <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline ml-2">↗</a>
-                              )}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
-
-                    {myAssignment.giving_to.linkedin_url && (
-                      <p>
-                        <span className="font-medium text-gray-700">LinkedIn:</span>{' '}
-                        <a href={myAssignment.giving_to.linkedin_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                          View Profile ↗
-                        </a>
-                      </p>
-                    )}
-
-                    {myAssignment.giving_to.website_url && (
-                      <p>
-                        <span className="font-medium text-gray-700">Website:</span>{' '}
-                        <a href={myAssignment.giving_to.website_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
-                          Visit Site ↗
-                        </a>
-                      </p>
-                    )}
-                  </div>
-
-                  <button
-                    onClick={() => router.push('/community')}
-                    className="mt-4 btn-primary text-sm"
-                  >
-                    View Full Profile in Community
-                  </button>
-                </div>
-              )}
-
-              {myAssignment.receiving_from && (
-                <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-red-500">
-                  <h3 className="text-lg font-bold text-red-700 mb-2">🎁 Your Secret Santa:</h3>
-                  <p className="text-xl font-semibold text-gray-900">{myAssignment.receiving_from.name}</p>
-                  <p className="text-sm text-gray-600 mt-2">
-                    They're choosing a special gift for you from our sponsor pool!
-                  </p>
-                </div>
-              )}
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Meet your Secret Santa</h2>
+              <div className="bg-white rounded-lg p-4 shadow-sm border-l-4 border-red-500">
+                <p className="text-xl font-semibold text-gray-900">{myAssignment.receiving_from.name}</p>
+                <p className="text-sm text-gray-600 mt-2">
+                  They've secured a sponsored gift for you. Scroll down to see the details and redeem it!
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -367,7 +589,7 @@ export default function ProfilePage() {
         <div className="card mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Generous Sponsors</h2>
           <p className="text-gray-600 mb-6">
-            These amazing people are making this Secret Santa possible by contributing gifts to the community!
+            These amazing people & organizations are making this Secret Santa possible by contributing gifts to the community!
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {sponsors.map(sponsor => (
@@ -409,7 +631,7 @@ export default function ProfilePage() {
       )}
 
       {/* My Gift Section */}
-      {myGift && (
+      {!timeUntilReveal && myGift && (
         <div className="card mb-6 bg-gradient-to-r from-red-50 to-green-50 border-2 border-red-200">
           <div className="flex items-start gap-4">
             <div className="text-4xl">🎁</div>
