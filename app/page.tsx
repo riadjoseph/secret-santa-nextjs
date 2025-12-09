@@ -24,6 +24,19 @@ export default function LoginPage() {
   useEffect(() => {
     loadGiftPreviews()
     loadSponsors()
+
+    // Check for auth error in URL
+    const searchParams = new URLSearchParams(window.location.search)
+    const error = searchParams.get('error')
+
+    if (error === 'auth_failed') {
+      setMessage({
+        type: 'error',
+        text: 'Authentication failed. Please try requesting a new magic link.'
+      })
+      // Clean URL
+      window.history.replaceState({}, '', '/')
+    }
   }, [])
 
   const loadGiftPreviews = async () => {
@@ -89,11 +102,15 @@ export default function LoginPage() {
   }
 
   // Check if already logged in
-  supabase.auth.onAuthStateChange((event, session) => {
-    if (session) {
-      router.push('/profile')
-    }
-  })
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        router.push('/profile')
+      }
+    })
+
+    return () => subscription.unsubscribe()
+  }, [router, supabase])
 
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4">

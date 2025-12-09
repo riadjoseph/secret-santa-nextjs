@@ -39,20 +39,14 @@ export const participantProfileSchema = z.object({
   expertise_level: z.enum(['Junior', 'Mid', 'Senior'], {
     message: 'Must select expertise level',
   }),
-  // Quick preset toggles instead of long text
-  gift_preference_preset: z.enum(['sponsored-tool', 'personal-audit', 'learning-resources', 'surprise-me']).optional(),
-  // Optional custom preferences (only if they want to elaborate)
-  preferences: z.string().max(300, 'Keep it brief (300 chars max)').optional().or(z.literal('')),
   // Simple wishlist - completely optional, allow empty items
   wishlist: z.array(z.object({
     name: z.string().max(100, 'Too long').optional().or(z.literal('')),
     url: z.string().optional().or(z.literal('')), // URL is completely optional
   })).max(3, 'Max 3 items').optional().default([{ name: '', url: '' }, { name: '', url: '' }, { name: '', url: '' }]),
-  // Optional fields (defer to later)
+  // Optional social fields
   linkedin_url: z.string().url('Invalid URL').optional().or(z.literal('')),
   website_url: z.string().url('Invalid URL').optional().or(z.literal('')),
-  bio: z.string().max(200, 'Keep it brief').optional().or(z.literal('')),
-  address: z.string().max(500, 'Too long').optional().or(z.literal('')),
 })
 
 // Sponsor schema

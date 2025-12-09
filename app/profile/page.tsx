@@ -20,9 +20,6 @@ export default function ProfilePage() {
     linkedin_url: '',
     website_url: '',
     expertise_level: 'Mid' as 'Junior' | 'Mid' | 'Senior',
-    bio: '',
-    preferences: '',
-    address: '',
     wishlist: [
       { name: '', url: '' },
       { name: '', url: '' },
@@ -62,9 +59,6 @@ export default function ProfilePage() {
           linkedin_url: profileData.linkedin_url || '',
           website_url: profileData.website_url || '',
           expertise_level: profileData.expertise_level || 'Mid',
-          bio: profileData.bio || '',
-          preferences: profileData.preferences || '',
-          address: profileData.address || '',
           wishlist: profileData.wishlist || [
             { name: '', url: '' },
             { name: '', url: '' },
@@ -134,10 +128,18 @@ export default function ProfilePage() {
         text: 'Profile saved successfully!',
       })
     } catch (error: any) {
-      setMessage({
-        type: 'error',
-        text: error.message || 'Failed to save profile. Please try again.',
-      })
+      // Handle duplicate key error gracefully (user clicked save twice)
+      if (error.message?.includes('duplicate key') || error.code === '23505') {
+        setMessage({
+          type: 'success',
+          text: 'Your details are saved.',
+        })
+      } else {
+        setMessage({
+          type: 'error',
+          text: error.message || 'Failed to save profile. Please try again.',
+        })
+      }
     } finally {
       setSaving(false)
     }
@@ -363,47 +365,11 @@ export default function ProfilePage() {
             </div>
           </div>
 
-          <div className="mt-4">
-            <label htmlFor="bio" className="label">
-              Short Bio (help your Santa know you)
-            </label>
-            <textarea
-              id="bio"
-              value={formData.bio}
-              onChange={(e) => setFormData({ ...formData, bio: e.target.value })}
-              className="input"
-              rows={3}
-              maxLength={300}
-              placeholder="Tell us about yourself..."
-            />
-            <p className="text-xs text-gray-500 mt-1">{formData.bio.length}/300 characters</p>
-          </div>
-        </div>
-
-        {/* Gift Preferences */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">2. Your Gift Preferences</h2>
-          <p className="text-sm text-gray-600 mb-3">
-            Tell us what kind of SEO tools or services you'd be interested in receiving!
-            Our sponsors contribute gifts to help the SEO community.
-          </p>
-          <label htmlFor="preferences" className="label">
-            What are you interested in? (Optional)
-          </label>
-          <textarea
-            id="preferences"
-            value={formData.preferences}
-            onChange={(e) => setFormData({ ...formData, preferences: e.target.value })}
-            className="input"
-            rows={4}
-            placeholder="E.g., technical SEO audits, keyword research tools, link building services, content optimization..."
-          />
-          <p className="text-xs text-gray-500 mt-1">{formData.preferences.length} / 300 characters</p>
         </div>
 
         {/* Wishlist */}
         <div>
-          <h2 className="text-xl font-semibold mb-4">3. Your Wishlist (Optional)</h2>
+          <h2 className="text-xl font-semibold mb-4">2. Your Wishlist (Optional)</h2>
           <p className="text-sm text-gray-600 mb-3">Give your Santa up to 3 gift ideas! This is completely optional.</p>
 
           {formData.wishlist.map((item, index) => (
@@ -444,25 +410,6 @@ export default function ProfilePage() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* Shipping Address */}
-        <div>
-          <h2 className="text-xl font-semibold mb-4">4. Shipping Address (Optional)</h2>
-          <p className="text-sm text-gray-600 mb-3">
-            Only if you're open to receiving physical gifts (books, swag, etc).
-          </p>
-          <label htmlFor="address" className="label">
-            Address
-          </label>
-          <textarea
-            id="address"
-            value={formData.address}
-            onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            className="input"
-            rows={3}
-            placeholder="Your mailing address (optional)"
-          />
         </div>
 
         {/* Submit Button */}

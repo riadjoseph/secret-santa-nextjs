@@ -32,8 +32,11 @@ export async function GET(request: NextRequest) {
     if (!error) {
       return NextResponse.redirect(`${origin}${next}`)
     }
+
+    // Log error for debugging
+    console.error('Auth callback error:', error)
   }
 
-  // If there's an error, redirect to home with error message
+  // If there's an error or no code, redirect to home with error message
   return NextResponse.redirect(`${origin}/?error=auth_failed`)
 }
