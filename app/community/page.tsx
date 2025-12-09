@@ -50,8 +50,7 @@ export default function CommunityPage() {
     if (searchTerm) {
       const term = searchTerm.toLowerCase()
       filtered = filtered.filter(p =>
-        p.name?.toLowerCase().includes(term) ||
-        p.email?.toLowerCase().includes(term)
+        p.name?.toLowerCase().includes(term)
       )
     }
 
@@ -93,7 +92,7 @@ export default function CommunityPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="search" className="label">
-              Search by name or email
+              Search by name
             </label>
             <input
               id="search"
@@ -141,7 +140,9 @@ export default function CommunityPage() {
                   <h3 className="text-lg font-bold text-gray-900 truncate">
                     {participant.name || 'Anonymous'}
                   </h3>
-                  <p className="text-sm text-gray-600 truncate">{participant.email}</p>
+                  <p className="text-xs text-gray-500">
+                    Joined {new Date(participant.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                  </p>
                 </div>
               </div>
 

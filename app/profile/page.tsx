@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
-import type { Participant, GiftAssignmentWithDetails } from '@/lib/supabase'
+import type { Participant, GiftAssignmentWithDetails, Sponsor } from '@/lib/supabase'
 import { validateParticipantProfile, type ParticipantProfileInput } from '@/lib/validation'
 import { getTimeUntilReveal, getRevealDateFormatted } from '@/lib/config'
 
@@ -12,6 +12,7 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<Partial<Participant> | null>(null)
   const [myGift, setMyGift] = useState<GiftAssignmentWithDetails | null>(null)
   const [myAssignment, setMyAssignment] = useState<{giving_to?: Participant, receiving_from?: Participant} | null>(null)
+  const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [timeUntilReveal, setTimeUntilReveal] = useState(getTimeUntilReveal())
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -101,6 +102,15 @@ export default function ProfilePage() {
         // Silently fail - assignments may not be revealed yet or user may not be matched
         console.log('Assignment not yet available:', error)
       }
+
+      // Load sponsors
+      const { data: sponsorsData } = await supabase
+        .from('sponsors')
+        .select('*')
+        .eq('approval_status', 'approved')
+        .order('tier', { ascending: true })
+
+      if (sponsorsData) setSponsors(sponsorsData)
 
       setLoading(false)
     }
@@ -348,6 +358,52 @@ export default function ProfilePage() {
                 </div>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sponsors Section */}
+      {sponsors.length > 0 && (
+        <div className="card mb-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Generous Sponsors</h2>
+          <p className="text-gray-600 mb-6">
+            These amazing companies are making this Secret Santa possible by contributing gifts to the community!
+          </p>
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {sponsors.map(sponsor => (
+              <div key={sponsor.id} className="flex flex-col items-center text-center">
+                {sponsor.logo_url ? (
+                  <img
+                    src={sponsor.logo_url}
+                    alt={sponsor.company_name}
+                    className="h-16 w-auto object-contain mb-2"
+                  />
+                ) : (
+                  <div className="px-4 py-3 bg-gray-100 rounded-lg font-semibold text-gray-800 mb-2">
+                    {sponsor.company_name}
+                  </div>
+                )}
+                {sponsor.tier && (
+                  <span className={`text-xs px-2 py-1 rounded ${
+                    sponsor.tier === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
+                    sponsor.tier === 'Silver' ? 'bg-gray-200 text-gray-800' :
+                    'bg-orange-100 text-orange-800'
+                  }`}>
+                    {sponsor.tier}
+                  </span>
+                )}
+                {sponsor.website && (
+                  <a
+                    href={sponsor.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-xs text-blue-600 hover:underline mt-2"
+                  >
+                    Visit →
+                  </a>
+                )}
+              </div>
+            ))}
           </div>
         </div>
       )}
