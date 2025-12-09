@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { LogoWithText } from "@/components/Logo";
 
 export const metadata: Metadata = {
   title: "SEO Kringle - Secret Santa",
@@ -17,8 +18,7 @@ export default function RootLayout({
         <div className="min-h-screen flex flex-col">
           <header className="bg-primary-600 text-white py-4 px-6 shadow-lg">
             <div className="container mx-auto max-w-6xl">
-              <h1 className="text-2xl font-bold">🎅 SEO Kringle</h1>
-              <p className="text-sm text-primary-100">Secret Santa Gift Exchange</p>
+              <LogoWithText />
             </div>
           </header>
 
