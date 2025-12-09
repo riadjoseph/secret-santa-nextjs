@@ -88,7 +88,7 @@ export default function LoginPage() {
 
       setMessage({
         type: 'success',
-        text: `Magic link sent to ${email}! Please check your inbox.`,
+        text: `Magic link sent to ${email}! Check your inbox AND spam/junk folder for an email from Supabase. Click the link to sign in.`,
       })
       setEmail('')
     } catch (error: any) {
@@ -123,7 +123,7 @@ export default function LoginPage() {
           Join the gift exchange and spread holiday cheer!
         </p>
         <p className="text-gray-600">
-          Enter the draw to give and receive - featuring gifts generously sponsored by top SEO tools
+          Enter the draw to give and receive - featuring gifts generously sponsored by lovely SEO tools
         </p>
       </div>
 
@@ -296,8 +296,8 @@ export default function LoginPage() {
           </p>
           <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
             <li>Enter your email address</li>
-            <li>Check your inbox for a magic link</li>
-            <li>Click the link to sign in securely</li>
+            <li>Check your inbox <strong>and spam/junk folder</strong> for an email from Supabase</li>
+            <li>Click the magic link to sign in securely</li>
             <li>Complete your profile and join the exchange!</li>
           </ol>
         </div>
