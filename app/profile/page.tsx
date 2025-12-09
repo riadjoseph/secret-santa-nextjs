@@ -367,7 +367,7 @@ export default function ProfilePage() {
         <div className="card mb-6">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">Our Generous Sponsors</h2>
           <p className="text-gray-600 mb-6">
-            These amazing companies are making this Secret Santa possible by contributing gifts to the community!
+            These amazing people are making this Secret Santa possible by contributing gifts to the community!
           </p>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {sponsors.map(sponsor => (

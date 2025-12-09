@@ -3,7 +3,8 @@
     "allow": [
       "Bash(test:*)",
       "Bash(npm install:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\nFix: Statistics dashboard permissions and access control\n\n- Add admin check logic to conditionally show admin-only features\n- Hide \"Matching\" tab from regular users (admin-only)\n- Remove email column from Participants tab for non-admin users\n- Fix empty Sponsors tab by using direct Supabase query instead of admin API\n- Fix empty Gifts tab by using direct Supabase query instead of admin API\n\nRegular users now see:\n- 4 tabs: Statistics, Participants, Sponsors, Gifts\n- Participant data without emails (Name, Expertise, Joined only)\n- Full sponsors and gifts data\n\nAdmin users see:\n- All 5 tabs including Matching\n- Complete participant data with emails\n- Full assignment list in Matching tab\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude Sonnet 4.5 <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
