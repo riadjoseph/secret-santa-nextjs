@@ -129,17 +129,6 @@ async function sendGiverEmail(
 ): Promise<void> {
   const supabase = createAdminClient()
 
-  // Format wishlist for email
-  const wishlistText = receiver.wishlist && receiver.wishlist.length > 0
-    ? receiver.wishlist
-        .filter(item => item.name && item.name.trim() !== '')
-        .map(item => {
-          const url = item.url && item.url.trim() !== '' ? ` (${item.url})` : ''
-          return `• ${item.name}${url}`
-        })
-        .join('\n')
-    : '• No wishlist items yet'
-
   const emailHtml = `
 <!DOCTYPE html>
 <html>
@@ -161,15 +150,6 @@ async function sendGiverEmail(
     <div style="background: white; padding: 20px; border-left: 4px solid #10b981; border-radius: 5px; margin: 20px 0;">
       <p style="font-size: 18px; margin: 0 0 10px 0;">🎁 You are the Secret Santa for:</p>
       <p style="font-size: 24px; font-weight: bold; color: #667eea; margin: 0;">${receiver.name}</p>
-    </div>
-
-    <div style="background: white; padding: 20px; border-radius: 5px; margin: 20px 0;">
-      <h3 style="margin-top: 0; color: #374151;">Here's what they'd love to receive:</h3>
-      <p><strong>Expertise Level:</strong> ${receiver.expertise_level}</p>
-      <p><strong>Wishlist:</strong></p>
-      <div style="margin-left: 20px; white-space: pre-line;">${wishlistText}</div>
-      ${receiver.linkedin_url ? `<p><strong>LinkedIn:</strong> <a href="${receiver.linkedin_url}" style="color: #667eea;">${receiver.linkedin_url}</a></p>` : ''}
-      ${receiver.website_url ? `<p><strong>Website:</strong> <a href="${receiver.website_url}" style="color: #667eea;">${receiver.website_url}</a></p>` : ''}
     </div>
 
     <div style="background: #fef3c7; padding: 15px; border-radius: 5px; margin: 20px 0;">
