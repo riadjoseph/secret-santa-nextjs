@@ -14,8 +14,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="antialiased">
-        <div className="min-h-screen flex flex-col">
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+      <body className="antialiased font-sans">
+        <div className="min-h-screen flex flex-col bg-gray-50">
           <header className="bg-primary-600 text-white py-4 px-6 shadow-lg">
             <div className="container mx-auto max-w-6xl">
               <LogoWithText />
@@ -27,11 +35,9 @@ export default function RootLayout({
           </main>
 
           <footer className="bg-gray-100 py-4 px-6 text-center text-sm text-gray-600">
+            <p className="mb-2">SEO Kringle 2025 - Community Gift Exchange</p>
             <p className="mb-2">
-              SEO Kringle 2025 - Community Gift Exchange
-            </p>
-            <p className="mb-2">
-              Made with ❤️ by{' '}
+              Made with ❤️ by{" "}
               <a
                 href="https://www.linkedin.com/in/riadjoseph/"
                 target="_blank"
@@ -39,8 +45,8 @@ export default function RootLayout({
                 className="text-blue-600 hover:underline font-medium"
               >
                 Riad Joseph
-              </a>
-              {' '}+ Claude Code, ChatGPT and Gemini
+              </a>{" "}
+              + Claude Code, ChatGPT and Gemini
             </p>
             <p>
               <a href="/privacy-policy" className="text-blue-600 hover:underline">

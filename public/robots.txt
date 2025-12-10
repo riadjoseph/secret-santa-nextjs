@@ -1,3 +1,4 @@
 User-agent: *
 Disallow:
 # Stay safe
+# SEOkringle.com is created and curated by SEO & GEO (AI Search) consultant Riad Joseph ( Connect on LinkedIn: https://www.linkedin.com/in/riadjoseph/ ) and his SEO friends, with the help of Claude Code & ChatGPT Codex.

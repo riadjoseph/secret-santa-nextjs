@@ -13,6 +13,68 @@ type GiftPreview = {
   sponsor: Sponsor
 }
 
+type LLMRibbonOption = {
+  id: string
+  name: string
+  tagline: string
+  baseUrl: string
+  queryParam: string
+  prompt: string
+}
+
+const LLM_RIBBON_OPTIONS: LLMRibbonOption[] = [
+  {
+    id: 'chatgpt',
+    name: 'ChatGPT',
+    tagline: 'Warm, social explainer',
+    baseUrl: 'https://chat.openai.com/',
+    queryParam: 'prompt',
+    prompt:
+      'Explain what SEO Kringle (the SEO Community Secret Santa hosted at SEOkringle.com) is, how the Secret Santa flow works, what Kringle means linguistically/culturally, and why the program is inclusive and beyond religion. Mention that sponsors donate gifts and the call to action is to join the exchange.'
+  },
+  {
+    id: 'mistral',
+    name: 'Mistral',
+    tagline: 'Bullet-point clarity',
+    baseUrl: 'https://chat.mistral.ai/chat',
+    queryParam: 'q',
+    prompt:
+      'Give a concise bullet summary of SEO Kringle, the Secret Santa platform at SEOkringle.com. Cover: the mission of the site, how its Secret Santa gifting works, what “Kringle” references, and how the event welcomes every background beyond religion. Suggest a friendly CTA to enter via LinkedIn.'
+  },
+  {
+    id: 'claude',
+    name: 'Claude',
+    tagline: 'Storyteller mode',
+    baseUrl: 'https://claude.ai/chat',
+    queryParam: 'input',
+    prompt:
+      'Narrate what happens on SEOkringle.com. Explain the Secret Santa process, define Kringle as a pastry/Santa nickname, and emphasize the inclusive, non-religious spirit. Keep the tone poetic yet clear.'
+  },
+  {
+    id: 'perplexity',
+    name: 'Perplexity',
+    tagline: 'Research vibe',
+    baseUrl: 'https://www.perplexity.ai/search',
+    queryParam: 'q',
+    prompt:
+      'Summarize SEO Kringle: the site concept at SEOkringle.com, how the Secret Santa gifting works, what Kringle means, and why it is beyond religion and open to everyone. Highlight that SEO sponsors underwrite the gifts.'
+  },
+  {
+    id: 'grok',
+    name: 'Grok',
+    tagline: 'Snappy and bold',
+    baseUrl: 'https://x.com/i/grok',
+    queryParam: 'text',
+    prompt:
+      'Give a punchy explanation of SEO Kringle (SEO Community Secret Santa) over at SEOkringle.com. Include: how it works, why it is inclusive and not religious, what Kringle means, and a playful CTA to jump in.'
+  }
+]
+
+const buildLLMUrl = (option: LLMRibbonOption) => {
+  const separator = option.baseUrl.includes('?') ? '&' : '?'
+  return `${option.baseUrl}${separator}${option.queryParam}=${encodeURIComponent(option.prompt)}`
+}
+
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
@@ -158,10 +220,10 @@ export default function LoginPage() {
   }, [router, supabase])
 
   return (
-    <div className="max-w-6xl mx-auto mt-8 px-4">
+    <div className="space-y-12">
       {/* Hero Section with Gift Preview */}
-      <div className="text-center mb-8 px-4">
-        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+      <div className="text-center mb-8 px-2 sm:px-4">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-display">
           🎄 SEO Community Secret Santa 🥨
         </h1>
         <p className="text-lg sm:text-xl text-gray-700 mb-2">
@@ -176,7 +238,7 @@ export default function LoginPage() {
           <button
             onClick={handleLinkedInLogin}
             disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg py-4"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-xl py-4"
           >
             {loading ? (
               'Connecting...'
@@ -192,13 +254,13 @@ export default function LoginPage() {
         </div>
 
         {/* Live Stats Counter */}
-        <div className="max-w-2xl mx-auto">
+        <div className="mx-auto">
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-200 shadow-sm">
               <div className="text-3xl font-bold text-green-700 mb-1">
                 {participantCount}
               </div>
-              <div className="text-sm text-gray-700 font-medium">
+              <div className="text-gray-700 font-medium">
                 🎁 Participants Joined
               </div>
             </div>
@@ -206,7 +268,7 @@ export default function LoginPage() {
               <div className="text-3xl font-bold text-blue-700 mb-1">
                 {sponsorCount}
               </div>
-              <div className="text-sm text-gray-700 font-medium">
+              <div className="text-gray-700 font-medium">
                 🎄 Generous Sponsors
               </div>
             </div>
@@ -215,11 +277,11 @@ export default function LoginPage() {
       </div>
 
       {/* Countdown Timer to Reveal Date */}
-      <div className="max-w-2xl mx-auto mb-12">
+      <div className="mx-auto mb-12">
         {timeUntilReveal ? (
           <div className="bg-gradient-to-br from-red-50 via-green-50 to-red-50 rounded-lg p-6 sm:p-8 border-2 border-red-200 shadow-lg">
             <div className="text-center">
-              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 font-display">
                 🎄 Secret Santa Reveal In: 🧦
               </h2>
               <div className="flex justify-center gap-4 sm:gap-6 my-6">
@@ -228,7 +290,7 @@ export default function LoginPage() {
                     <div className="text-3xl sm:text-4xl font-bold text-red-600">
                       {timeUntilReveal.days}
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                    <div className="text-gray-600 mt-1">
                       {timeUntilReveal.days === 1 ? 'Day' : 'Days'}
                     </div>
                   </div>
@@ -238,7 +300,7 @@ export default function LoginPage() {
                     <div className="text-3xl sm:text-4xl font-bold text-green-600">
                       {timeUntilReveal.hours}
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                    <div className="text-gray-600 mt-1">
                       {timeUntilReveal.hours === 1 ? 'Hour' : 'Hours'}
                     </div>
                   </div>
@@ -248,13 +310,13 @@ export default function LoginPage() {
                     <div className="text-3xl sm:text-4xl font-bold text-red-600">
                       {timeUntilReveal.minutes}
                     </div>
-                    <div className="text-xs sm:text-sm text-gray-600 mt-1">
+                    <div className="text-gray-600 mt-1">
                       {timeUntilReveal.minutes === 1 ? 'Min' : 'Mins'}
                     </div>
                   </div>
                 </div>
               </div>
-              <p className="text-sm sm:text-base text-gray-700 font-medium">
+              <p className="text-gray-700 font-medium">
                 ⏰ Mark your calendar: <span className="font-bold text-red-700">{getRevealDateFormatted()}</span>
               </p>
             </div>
@@ -278,7 +340,7 @@ export default function LoginPage() {
 
       {/* How It Works Section */}
       <div className="mb-12 bg-gradient-to-br from-green-50 to-red-50 rounded-lg p-4 sm:p-6 md:p-8 border-2 border-green-200">
-        <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">How It Works</h2>
+        <h2 className="text-4xl font-bold text-center mb-6 sm:mb-8 font-display">How It Works</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="text-center bg-white rounded-lg p-6 shadow-sm">
             <div className="text-5xl mb-4">🎯</div>
@@ -304,11 +366,11 @@ export default function LoginPage() {
         </div>
 
         {/* CTA Button after How It Works */}
-        <div className="max-w-md mx-auto">
+        <div className="mx-auto">
           <button
             onClick={handleLinkedInLogin}
             disabled={loading}
-            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg py-4"
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-xl py-4"
           >
             {loading ? (
               'Connecting...'
@@ -327,17 +389,17 @@ export default function LoginPage() {
       {/* For Sponsors Section */}
       <div className="mb-12 bg-gradient-to-br from-blue-50 via-red-50 to-green-50 rounded-lg p-4 sm:p-6 border-2 border-blue-300 shadow-lg">
         <div className="max-w-4xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-2">🎁 For Sponsors 🎁</h2>
+          <h2 className="text-4xl font-bold text-center mb-2 font-display">🎁 Why Not Sponsor?</h2>
           <p className="text-center text-gray-700 mb-6">
-            🧦 Want to give back to the SEO community and showcase your tools or services? 🥨
-          </p>
+🧦 Share some cheer with the SEO community and spotlight your tools or services.
+You don’t need to go all out — a few meaningful gifts go a long way. 🥨          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white rounded-lg p-6 flex flex-col h-full shadow-md border-2 border-green-200">
               <h3 className="font-bold mb-3 text-lg">🎄 Sponsor Login</h3>
-              <p className="text-sm text-gray-700 mb-3">
+              <p className="text-gray-700 mb-3">
                 If you're an approved sponsor, use the magic link login below. Once logged in, you'll have access to your sponsor dashboard where you can:
               </p>
-              <ul className="text-sm text-gray-700 list-disc list-inside space-y-2 ml-2 flex-grow">
+              <ul className="text-gray-700 list-disc list-inside space-y-2 ml-2 flex-grow">
                 <li>🎁 Add and manage your gift offerings</li>
                 <li>📊 View analytics on gift distribution and redemption</li>
                 <li>❤️ Track engagement with your contributions</li>
@@ -347,10 +409,10 @@ export default function LoginPage() {
               <h3 className="text-lg font-bold text-gray-900 mb-3">
                 🧦 Interested in becoming a sponsor?
               </h3>
-              <p className="text-sm text-gray-700 mb-3 flex-grow">
+              <p className="text-gray-700 mb-3 flex-grow">
                 Contact me at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to get started; it is free of charge obviously (you are already very generous)! 🎁
               </p>
-              <p className="text-xs text-gray-600">
+              <p className="text-gray-600">
                 🎄 You will receive your dedicated login where you will manage your gifts and company listing.
               </p>
             </div>
@@ -361,7 +423,7 @@ export default function LoginPage() {
       {/* Sponsor Logos */}
       {sponsors.length > 0 && (
         <div className="mb-12">
-          <h2 className="text-2xl font-bold text-center mb-6">Our Generous Sponsors</h2>
+          <h2 className="text-4xl font-bold text-center mb-6">2025-2026 Generous Sponsors</h2>
           <div className="flex flex-wrap justify-center items-center gap-8">
             {sponsors.map(sponsor => (
               <div key={sponsor.id} className="flex flex-col items-center">
@@ -377,7 +439,7 @@ export default function LoginPage() {
                   </div>
                 )}
                 {sponsor.tier && (
-                  <span className={`text-xs px-2 py-1 rounded ${
+                  <span className={`px-2 py-1 rounded ${
                     sponsor.tier === 'Gold' ? 'bg-yellow-100 text-yellow-800' :
                     sponsor.tier === 'Silver' ? 'bg-gray-100 text-gray-800' :
                     'bg-orange-100 text-orange-800'
@@ -400,14 +462,14 @@ export default function LoginPage() {
               <div key={gift.id} className="card bg-gradient-to-br from-red-50 to-green-50 border-2 border-red-200">
                 <div className="flex items-start justify-between mb-2">
                   <h3 className="font-bold text-lg text-gray-900">{gift.gift_name}</h3>
-                  <span className="px-2 py-1 bg-white rounded text-xs text-gray-700">
+                  <span className="px-2 py-1 bg-white rounded text-gray-700">
                     {gift.gift_type}
                   </span>
                 </div>
-                <p className="text-sm text-gray-700">
+                <p className="text-gray-700">
                   Sponsored by <span className="font-semibold">{gift.sponsor.company_name}</span>
                 </p>
-                <p className="text-xs text-gray-600 mt-2">
+                <p className="text-gray-600 mt-2">
                   🎄 Sign in to see if you'll receive this gift!
                 </p>
               </div>
@@ -417,7 +479,7 @@ export default function LoginPage() {
       )}
 
       {/* Login Form */}
-      <div className="max-w-md mx-auto">
+      <div className="mx-auto">
         <div className="card">
           <div className="text-center mb-6">
             <h2 className="text-3xl font-bold text-gray-900 mb-2">Sign In to Participate</h2>
@@ -458,24 +520,56 @@ export default function LoginPage() {
 
           {/* Privacy Notice */}
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-sm text-yellow-900 mb-2">
+            <p className="text-yellow-900 mb-2">
               <strong>⚠️ Important:</strong> By signing up, your name, email, and profile information will be visible to all participants.
             </p>
-            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline font-medium">
+            <a href="/privacy-policy" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">
               Read our Privacy Policy →
             </a>
           </div>
 
           <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <p className="text-sm text-blue-900">
+            <p className="text-blue-900">
               <strong>How it works:</strong>
             </p>
-            <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
+            <ol className="text-blue-800 mt-2 space-y-1 list-decimal list-inside">
               <li>Click "Enter with LinkedIn" to authenticate securely</li>
               <li>Authorize SEO Kringle to access your basic LinkedIn profile</li>
               <li>Complete your profile with wishlist and preferences</li>
               <li>Join the Secret Santa gift exchange!</li>
             </ol>
+          </div>
+        </div>
+      </div>
+
+      {/* AI explainer ribbon */}
+      <div className="mt-12">
+        <div className="bg-gradient-to-r from-purple-700 via-rose-600 to-amber-500 text-white rounded-2xl shadow-xl border border-white/40">
+          <div className="p-4 sm:p-6">
+            <div className="flex flex-col gap-2 mb-4">
+              <p className="text-xl sm:text-2xl font-display">
+                Want your favorite LLM to pitch SEO Kringle?
+              </p>
+              <p className="text-sm sm:text-base text-white/90">
+                Each link opens a pre-filled prompt asking the AI to explain the site, the Secret Santa mechanics, what a Kringle is, and
+                why this exchange is open to every belief (or none at all).
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              {LLM_RIBBON_OPTIONS.map(option => (
+                <a
+                  key={option.id}
+                  href={buildLLMUrl(option)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col justify-center rounded-xl border border-white/60 bg-white/10 px-4 py-3 min-w-[140px] hover:bg-white/20 transition-colors"
+                  aria-label={`Launch ${option.name} with the SEO Kringle explainer prompt`}
+                >
+                  <span className="text-lg font-semibold">{option.name}</span>
+                  <span className="text-sm text-white/80">{option.tagline}</span>
+                </a>
+              ))}
+            </div>
           </div>
         </div>
       </div>
