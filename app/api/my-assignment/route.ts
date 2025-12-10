@@ -35,7 +35,12 @@ export async function GET(request: NextRequest) {
 
     if (givingError) {
       console.error('Error fetching giving assignment:', givingError)
+      console.error('User email:', user.email)
+      console.error('Error code:', givingError.code)
+      console.error('Error details:', givingError.details)
     }
+
+    console.log('Giving assignment found:', !!givingAssignment, 'for user:', user.email)
 
     let selectedGift: GiftAssignmentWithDetails | null = null
 
@@ -115,6 +120,8 @@ export async function GET(request: NextRequest) {
         ? receivingAssignment.giver[0]
         : receivingAssignment.giver
     }
+
+    console.log('API Response:', JSON.stringify(response, null, 2))
 
     return NextResponse.json(response)
   } catch (error: any) {
