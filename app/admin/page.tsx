@@ -24,27 +24,29 @@ export default function AdminPage() {
 
   useEffect(() => {
     async function loadData() {
-      const { data: { user } } = await supabase.auth.getUser()
+      try {
+        // Check if user has admin access (sponsor or regular admin)
+        const response = await fetch('/api/auth/check-admin')
+        const data = await response.json()
 
-      if (!user) {
+        if (!response.ok || !data.isAdmin) {
+          router.push('/')
+          return
+        }
+
+        // Set user data (could be sponsor or regular user)
+        setUser(data.type === 'sponsor' ? data.sponsor : data.user)
+        await loadParticipants()
+      } catch (error) {
+        console.error('Error loading admin data:', error)
         router.push('/')
-        return
+      } finally {
+        setLoading(false)
       }
-
-      // Check if admin
-      const adminEmails = process.env.NEXT_PUBLIC_ADMIN_EMAILS?.split(',').map(e => e.trim()) || []
-      if (!adminEmails.includes(user.email || '')) {
-        router.push('/profile')
-        return
-      }
-
-      setUser(user)
-      await loadParticipants()
-      setLoading(false)
     }
 
     loadData()
-  }, [router, supabase])
+  }, [router])
 
   const loadParticipants = async () => {
     const { data } = await supabase
@@ -204,11 +206,18 @@ export default function AdminPage() {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Admin Panel</h1>
-          <p className="text-sm text-gray-600 mt-1">Logged in as: {user?.email}</p>
+          <p className="text-sm text-gray-600 mt-1">
+            Logged in as: {user?.company_name || user?.email || 'Administrator'}
+          </p>
         </div>
-        <button onClick={() => router.push('/profile')} className="btn-secondary">
-          ← Back to Profile
-        </button>
+        <div className="flex gap-2">
+          <button onClick={async () => {
+            await fetch('/api/sponsor/login', { method: 'DELETE' })
+            router.push('/')
+          }} className="btn-secondary">
+            Logout
+          </button>
+        </div>
       </div>
 
       <div className="card">
