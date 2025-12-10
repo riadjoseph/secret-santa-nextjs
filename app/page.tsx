@@ -106,15 +106,18 @@ export default function LoginPage() {
 
   const loadCounts = async () => {
     // Count total participants
-    const { count: participantsTotal } = await supabase
+    const { count: participantsTotal, error: participantsError } = await supabase
       .from('participants')
       .select('*', { count: 'exact', head: true })
 
     // Count approved sponsors
-    const { count: sponsorsTotal } = await supabase
+    const { count: sponsorsTotal, error: sponsorsError } = await supabase
       .from('sponsors')
       .select('*', { count: 'exact', head: true })
       .eq('approval_status', 'approved')
+
+    console.log('Participants count:', participantsTotal, participantsError)
+    console.log('Sponsors count:', sponsorsTotal, sponsorsError)
 
     if (participantsTotal !== null) setParticipantCount(participantsTotal)
     if (sponsorsTotal !== null) setSponsorCount(sponsorsTotal)
