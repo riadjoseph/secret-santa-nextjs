@@ -10,7 +10,9 @@ import GiftManagement from '@/components/admin/GiftManagement'
 
 export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
-  const [activeTab, setActiveTab] = useState<'statistics' | 'matching' | 'sponsors' | 'gifts'>('statistics')
+  const [isFullAdmin, setIsFullAdmin] = useState(false)
+  const [sponsorId, setSponsorId] = useState<string | null>(null)
+  const [activeTab, setActiveTab] = useState<'statistics' | 'matching' | 'sponsors' | 'gifts'>('sponsors')
   const [participants, setParticipants] = useState<Participant[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,7 +38,17 @@ export default function AdminPage() {
 
         // Set user data (could be sponsor or regular user)
         setUser(data.type === 'sponsor' ? data.sponsor : data.user)
-        await loadParticipants()
+        setIsFullAdmin(data.isFullAdmin)
+
+        // If sponsor, store their ID for filtering
+        if (data.type === 'sponsor' && data.sponsor?.id) {
+          setSponsorId(data.sponsor.id)
+        }
+
+        // Only load participants if full admin
+        if (data.isFullAdmin) {
+          await loadParticipants()
+        }
       } catch (error) {
         console.error('Error loading admin data:', error)
         router.push('/')
@@ -224,10 +236,15 @@ export default function AdminPage() {
         {/* Tabs */}
         <div className="flex border-b mb-6 overflow-x-auto">
           {[
-            { id: 'statistics', label: 'Statistics', value: 'statistics' },
-            { id: 'sponsors', label: 'Sponsors', value: 'sponsors' },
+            // Only show Statistics and Matching tabs for full admins
+            ...(isFullAdmin ? [
+              { id: 'statistics', label: 'Statistics', value: 'statistics' },
+            ] : []),
+            { id: 'sponsors', label: isFullAdmin ? 'Sponsors' : 'My Company', value: 'sponsors' },
             { id: 'gifts', label: 'Gift Pool', value: 'gifts' },
-            { id: 'matching', label: 'Matching', value: 'matching' },
+            ...(isFullAdmin ? [
+              { id: 'matching', label: 'Matching', value: 'matching' },
+            ] : []),
           ].map((tab) => (
             <button
               key={tab.id}
@@ -243,8 +260,8 @@ export default function AdminPage() {
           ))}
         </div>
 
-        {/* Statistics Tab */}
-        {activeTab === 'statistics' && (
+        {/* Statistics Tab - Full Admin Only */}
+        {activeTab === 'statistics' && isFullAdmin && (
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Participant Statistics</h2>
@@ -346,8 +363,8 @@ export default function AdminPage() {
           </div>
         )}
 
-        {/* Matching Tab */}
-        {activeTab === 'matching' && (
+        {/* Matching Tab - Full Admin Only */}
+        {activeTab === 'matching' && isFullAdmin && (
           <div className="space-y-6">
             <div>
               <h2 className="text-xl font-semibold mb-4">Assignment Management</h2>
@@ -466,10 +483,10 @@ export default function AdminPage() {
         )}
 
         {/* Sponsors Tab */}
-        {activeTab === 'sponsors' && <SponsorManagement />}
+        {activeTab === 'sponsors' && <SponsorManagement sponsorId={sponsorId} isFullAdmin={isFullAdmin} />}
 
         {/* Gifts Tab */}
-        {activeTab === 'gifts' && <GiftManagement />}
+        {activeTab === 'gifts' && <GiftManagement sponsorId={sponsorId} isFullAdmin={isFullAdmin} />}
       </div>
     </div>
   )

@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react'
 import type { Sponsor } from '@/lib/supabase'
 
-export default function SponsorManagement() {
+type SponsorManagementProps = {
+  sponsorId?: string | null
+  isFullAdmin: boolean
+}
+
+export default function SponsorManagement({ sponsorId, isFullAdmin }: SponsorManagementProps) {
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
@@ -20,7 +25,7 @@ export default function SponsorManagement() {
 
   useEffect(() => {
     loadSponsors()
-  }, [])
+  }, [sponsorId])
 
   const loadSponsors = async () => {
     try {
@@ -28,7 +33,12 @@ export default function SponsorManagement() {
       const data = await response.json()
 
       if (data.success) {
-        setSponsors(data.data)
+        // If sponsorId is provided (sponsor user), filter to show only their own company
+        const filteredSponsors = sponsorId
+          ? data.data.filter((s: Sponsor) => s.id === sponsorId)
+          : data.data
+
+        setSponsors(filteredSponsors)
       }
     } catch (error) {
       console.error('Failed to load sponsors:', error)
@@ -160,13 +170,16 @@ export default function SponsorManagement() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Sponsor Management</h2>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="btn-primary"
-        >
-          {showForm ? 'Cancel' : 'Add Sponsor'}
-        </button>
+        <h2 className="text-xl font-semibold">{isFullAdmin ? 'Sponsor Management' : 'My Company'}</h2>
+        {/* Only show Add button for full admins */}
+        {isFullAdmin && (
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="btn-primary"
+          >
+            {showForm ? 'Cancel' : 'Add Sponsor'}
+          </button>
+        )}
       </div>
 
       {message && (
@@ -369,12 +382,15 @@ export default function SponsorManagement() {
                   >
                     Edit
                   </button>
-                  <button
-                    onClick={() => handleDelete(sponsor.id)}
-                    className="btn-secondary text-sm text-red-600 hover:bg-red-50"
-                  >
-                    Delete
-                  </button>
+                  {/* Only show Delete button for full admins */}
+                  {isFullAdmin && (
+                    <button
+                      onClick={() => handleDelete(sponsor.id)}
+                      className="btn-secondary text-sm text-red-600 hover:bg-red-50"
+                    >
+                      Delete
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

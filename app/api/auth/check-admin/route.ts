@@ -4,7 +4,8 @@ import { createServerSupabaseClient } from '@/lib/supabase-server'
 
 /**
  * GET /api/auth/check-admin
- * Check if current user has admin access (either sponsor or regular admin)
+ * Check if current user has admin access (full admin or sponsor)
+ * Returns different access levels based on user type
  */
 export async function GET(request: NextRequest) {
   try {
@@ -21,10 +22,11 @@ export async function GET(request: NextRequest) {
     const sponsorSession = await getSponsorSession()
 
     if (sponsorSession) {
-      // Sponsor is logged in
+      // Sponsor is logged in - limited access (only their own company and gifts)
       return NextResponse.json({
         isAdmin: true,
         type: 'sponsor',
+        isFullAdmin: false, // Sponsors are NOT full admins
         sponsor: {
           id: sponsorSession.sponsor_id,
           company_name: sponsorSession.company_name,
@@ -32,13 +34,14 @@ export async function GET(request: NextRequest) {
       })
     }
 
-    // Regular admin
+    // Regular admin - full access
     const supabase = await createServerSupabaseClient()
     const { data: { user } } = await supabase.auth.getUser()
 
     return NextResponse.json({
       isAdmin: true,
       type: 'user',
+      isFullAdmin: true, // Regular admins have full access
       user: {
         email: user?.email,
       },

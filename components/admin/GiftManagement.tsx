@@ -3,7 +3,12 @@
 import { useState, useEffect } from 'react'
 import type { Gift, Sponsor, GiftWithSponsor } from '@/lib/supabase'
 
-export default function GiftManagement() {
+type GiftManagementProps = {
+  sponsorId?: string | null
+  isFullAdmin: boolean
+}
+
+export default function GiftManagement({ sponsorId, isFullAdmin }: GiftManagementProps) {
   const [gifts, setGifts] = useState<GiftWithSponsor[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [loading, setLoading] = useState(true)
@@ -12,7 +17,7 @@ export default function GiftManagement() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const [formData, setFormData] = useState({
-    sponsor_id: '',
+    sponsor_id: sponsorId || '',
     gift_name: '',
     gift_description: '',
     gift_type: 'trial' as 'trial' | 'license' | 'audit' | 'consultation' | 'credits' | 'other',
@@ -23,7 +28,7 @@ export default function GiftManagement() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [sponsorId])
 
   const loadData = async () => {
     try {
@@ -35,8 +40,21 @@ export default function GiftManagement() {
       const giftsData = await giftsRes.json()
       const sponsorsData = await sponsorsRes.json()
 
-      if (giftsData.success) setGifts(giftsData.data)
-      if (sponsorsData.success) setSponsors(sponsorsData.data)
+      if (giftsData.success) {
+        // Filter gifts to only show sponsor's own gifts if sponsorId is provided
+        const filteredGifts = sponsorId
+          ? giftsData.data.filter((g: GiftWithSponsor) => g.sponsor_id === sponsorId)
+          : giftsData.data
+        setGifts(filteredGifts)
+      }
+
+      if (sponsorsData.success) {
+        // Filter sponsors list if sponsorId is provided
+        const filteredSponsors = sponsorId
+          ? sponsorsData.data.filter((s: Sponsor) => s.id === sponsorId)
+          : sponsorsData.data
+        setSponsors(filteredSponsors)
+      }
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
@@ -194,6 +212,7 @@ export default function GiftManagement() {
                 onChange={(e) => setFormData({ ...formData, sponsor_id: e.target.value })}
                 className="input"
                 required
+                disabled={!isFullAdmin} // Sponsors can't change this
               >
                 <option value="">Select sponsor</option>
                 {sponsors.map((sponsor) => (

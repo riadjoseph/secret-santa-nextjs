@@ -197,23 +197,23 @@ export default function LoginPage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div className="text-center">
             <div className="text-4xl mb-3">🎯</div>
-            <h3 className="font-bold text-lg mb-2">1. Enter the Draw</h3>
+            <h3 className="font-bold text-lg mb-2">1. Enter</h3>
             <p className="text-gray-700 text-sm">
-              Sign up and complete your profile. Share your SEO interests and what you'd love to receive.
+              Sign up with LinkedIn and complete your profile. Share your SEO interests and what you'd love to receive.
             </p>
           </div>
           <div className="text-center">
             <div className="text-4xl mb-3">🎁</div>
-            <h3 className="font-bold text-lg mb-2">2. We Match You</h3>
+            <h3 className="font-bold text-lg mb-2">2. Match</h3>
             <p className="text-gray-700 text-sm">
-              On reveal day, the system pairs everyone for gift exchange. Choose from gifts generously contributed by our sponsors!
+              On reveal day, the system pairs everyone for gift exchange. Choose from gifts generously contributed by our sponsors! Offer them to your match.
             </p>
           </div>
           <div className="text-center">
             <div className="text-4xl mb-3">🎄</div>
             <h3 className="font-bold text-lg mb-2">3. Give & Receive</h3>
             <p className="text-gray-700 text-sm">
-              Exchange gifts with your match and celebrate the holiday season with the SEO community!
+              Exchange a gift with your match and get to know the SEO community!
             </p>
           </div>
         </div>
