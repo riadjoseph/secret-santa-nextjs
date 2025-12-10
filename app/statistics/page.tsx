@@ -298,7 +298,10 @@ export default function StatisticsPage() {
                       </span>
                     </td>
                     <td className="px-4 py-3 text-sm text-gray-600">
-                      {new Date(p.created_at).toLocaleDateString()}
+                      {p.created_at
+                        ? new Date(p.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : 'N/A'
+                      }
                     </td>
                   </tr>
                 ))}

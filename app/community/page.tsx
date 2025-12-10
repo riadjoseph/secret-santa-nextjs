@@ -141,7 +141,10 @@ export default function CommunityPage() {
                     {participant.name || 'Anonymous'}
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Joined {new Date(participant.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+                    Joined {participant.created_at
+                      ? new Date(participant.created_at).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })
+                      : 'Recently'
+                    }
                   </p>
                 </div>
               </div>
