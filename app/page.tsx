@@ -90,6 +90,7 @@ export default function LoginPage() {
         provider: 'linkedin_oidc',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
+          scopes: 'openid profile email',
         },
       })
 
@@ -117,16 +118,36 @@ export default function LoginPage() {
   return (
     <div className="max-w-6xl mx-auto mt-8 px-4">
       {/* Hero Section with Gift Preview */}
-      <div className="text-center mb-12 px-4">
+      <div className="text-center mb-8 px-4">
         <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-          SEO Community Secret Santa 🎁
+          🎄 SEO Community Secret Santa 🥨
         </h1>
         <p className="text-lg sm:text-xl text-gray-700 mb-2">
-          Join the gift exchange and spread holiday cheer!
+          🎁 Join the gift exchange and spread holiday cheer! 🎁
         </p>
-        <p className="text-gray-600">
+        <p className="text-gray-600 mb-6">
           Enter the draw to give and receive - featuring gifts generously sponsored by lovely SEO tools
         </p>
+
+        {/* CTA Button - Above the Fold */}
+        <div className="max-w-md mx-auto">
+          <button
+            onClick={handleLinkedInLogin}
+            disabled={loading}
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg py-4"
+          >
+            {loading ? (
+              'Connecting...'
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                Enter with LinkedIn
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Countdown Timer to Reveal Date */}
@@ -135,7 +156,7 @@ export default function LoginPage() {
           <div className="bg-gradient-to-br from-red-50 via-green-50 to-red-50 rounded-lg p-6 sm:p-8 border-2 border-red-200 shadow-lg">
             <div className="text-center">
               <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
-                🎄 Secret Santa Reveal In:
+                🎄 Secret Santa Reveal In: 🧦
               </h2>
               <div className="flex justify-center gap-4 sm:gap-6 my-6">
                 <div className="flex flex-col items-center">
@@ -194,56 +215,81 @@ export default function LoginPage() {
       {/* How It Works Section */}
       <div className="mb-12 bg-gradient-to-br from-green-50 to-red-50 rounded-lg p-4 sm:p-6 md:p-8 border-2 border-green-200">
         <h2 className="text-2xl sm:text-3xl font-bold text-center mb-6 sm:mb-8">How It Works</h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="text-center">
-            <div className="text-4xl mb-3">🎯</div>
-            <h3 className="font-bold text-lg mb-2">1. Enter</h3>
-            <p className="text-gray-700 text-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+            <div className="text-5xl mb-4">🎯</div>
+            <h3 className="font-bold text-xl mb-3">1. Enter</h3>
+            <p className="text-gray-700">
               Sign up with LinkedIn and complete your profile. Share your SEO interests and what you'd love to receive.
             </p>
           </div>
-          <div className="text-center">
-            <div className="text-4xl mb-3">🎁</div>
-            <h3 className="font-bold text-lg mb-2">2. Match</h3>
-            <p className="text-gray-700 text-sm">
+          <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+            <div className="text-5xl mb-4">🎁</div>
+            <h3 className="font-bold text-xl mb-3">2. Match</h3>
+            <p className="text-gray-700">
               On reveal day, the system pairs everyone for gift exchange. Choose from gifts generously contributed by our sponsors! Offer them to your match.
             </p>
           </div>
-          <div className="text-center">
-            <div className="text-4xl mb-3">🎄</div>
-            <h3 className="font-bold text-lg mb-2">3. Give & Receive</h3>
-            <p className="text-gray-700 text-sm">
+          <div className="text-center bg-white rounded-lg p-6 shadow-sm">
+            <div className="text-5xl mb-4">🎄</div>
+            <h3 className="font-bold text-xl mb-3">3. Give & Receive</h3>
+            <p className="text-gray-700">
               Exchange a gift with your match and get to know the SEO community!
             </p>
           </div>
         </div>
+
+        {/* CTA Button after How It Works */}
+        <div className="max-w-md mx-auto">
+          <button
+            onClick={handleLinkedInLogin}
+            disabled={loading}
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 text-lg py-4"
+          >
+            {loading ? (
+              'Connecting...'
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                Enter with LinkedIn
+              </>
+            )}
+          </button>
+        </div>
       </div>
 
       {/* For Sponsors Section */}
-      <div className="mb-12 bg-blue-50 rounded-lg p-4 sm:p-6 border border-blue-200">
-        <div className="max-w-3xl mx-auto">
-          <h2 className="text-2xl font-bold text-center mb-4">For Sponsors</h2>
-          <p className="text-center text-gray-700 mb-4">
-            Want to give back to the SEO community and showcase your tools or services?
+      <div className="mb-12 bg-gradient-to-br from-blue-50 via-red-50 to-green-50 rounded-lg p-4 sm:p-6 border-2 border-blue-300 shadow-lg">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-2xl font-bold text-center mb-2">🎁 For Sponsors 🎁</h2>
+          <p className="text-center text-gray-700 mb-6">
+            🧦 Want to give back to the SEO community and showcase your tools or services? 🥨
           </p>
-          <div className="bg-white rounded-lg p-4 mb-4">
-            <h3 className="font-bold mb-2">Sponsor Login</h3>
-            <p className="text-sm text-gray-700 mb-2">
-              If you're an approved sponsor, use the magic link login below. Once logged in, you'll have access to your sponsor dashboard where you can:
-            </p>
-            <ul className="text-sm text-gray-700 list-disc list-inside space-y-1 ml-2">
-              <li>Add and manage your gift offerings</li>
-              <li>View analytics on gift distribution and redemption</li>
-              <li>Track engagement with your contributions</li>
-            </ul>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-600 mb-2">
-              Interested in becoming a sponsor?
-            </p>
-            <p className="text-sm text-gray-700">
-              Contact me at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to get started; it is free of charge obviously (you are already very generous)!
-            </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="bg-white rounded-lg p-6 flex flex-col h-full shadow-md border-2 border-green-200">
+              <h3 className="font-bold mb-3 text-lg">🎄 Sponsor Login</h3>
+              <p className="text-sm text-gray-700 mb-3">
+                If you're an approved sponsor, use the magic link login below. Once logged in, you'll have access to your sponsor dashboard where you can:
+              </p>
+              <ul className="text-sm text-gray-700 list-disc list-inside space-y-2 ml-2 flex-grow">
+                <li>🎁 Add and manage your gift offerings</li>
+                <li>📊 View analytics on gift distribution and redemption</li>
+                <li>❤️ Track engagement with your contributions</li>
+              </ul>
+            </div>
+            <div className="bg-white rounded-lg p-6 flex flex-col h-full shadow-md border-2 border-red-200">
+              <h3 className="text-lg font-bold text-gray-900 mb-3">
+                🧦 Interested in becoming a sponsor?
+              </h3>
+              <p className="text-sm text-gray-700 mb-3 flex-grow">
+                Contact me at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to get started; it is free of charge obviously (you are already very generous)! 🎁
+              </p>
+              <p className="text-xs text-gray-600">
+                🎄 You will receive your dedicated login where you will manage your gifts and company listing.
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -316,6 +362,36 @@ export default function LoginPage() {
             </p>
           </div>
 
+          {/* LinkedIn Button */}
+          <button
+            onClick={handleLinkedInLogin}
+            disabled={loading}
+            className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3 mb-6"
+          >
+            {loading ? (
+              'Connecting...'
+            ) : (
+              <>
+                <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
+                </svg>
+                Enter with LinkedIn
+              </>
+            )}
+          </button>
+
+          {message && (
+            <div
+              className={`mb-6 p-4 rounded-lg ${
+                message.type === 'success'
+                  ? 'bg-green-50 text-green-800 border border-green-200'
+                  : 'bg-red-50 text-red-800 border border-red-200'
+              }`}
+            >
+              {message.text}
+            </div>
+          )}
+
           {/* Privacy Notice */}
           <div className="mb-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-sm text-yellow-900 mb-2">
@@ -326,47 +402,18 @@ export default function LoginPage() {
             </a>
           </div>
 
-        <button
-          onClick={handleLinkedInLogin}
-          disabled={loading}
-          className="w-full btn-primary disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
-        >
-          {loading ? (
-            'Connecting...'
-          ) : (
-            <>
-              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z"/>
-              </svg>
-              Sign in with LinkedIn
-            </>
-          )}
-        </button>
-
-        {message && (
-          <div
-            className={`mt-4 p-4 rounded-lg ${
-              message.type === 'success'
-                ? 'bg-green-50 text-green-800 border border-green-200'
-                : 'bg-red-50 text-red-800 border border-red-200'
-            }`}
-          >
-            {message.text}
+          <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <p className="text-sm text-blue-900">
+              <strong>How it works:</strong>
+            </p>
+            <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
+              <li>Click "Enter with LinkedIn" to authenticate securely</li>
+              <li>Authorize SEO Kringle to access your basic LinkedIn profile</li>
+              <li>Complete your profile with wishlist and preferences</li>
+              <li>Join the Secret Santa gift exchange!</li>
+            </ol>
           </div>
-        )}
-
-        <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-          <p className="text-sm text-blue-900">
-            <strong>How it works:</strong>
-          </p>
-          <ol className="text-sm text-blue-800 mt-2 space-y-1 list-decimal list-inside">
-            <li>Click "Sign in with LinkedIn" to authenticate securely</li>
-            <li>Authorize SEO Kringle to access your basic LinkedIn profile</li>
-            <li>Complete your profile with wishlist and preferences</li>
-            <li>Join the Secret Santa gift exchange!</li>
-          </ol>
         </div>
-      </div>
       </div>
     </div>
   )

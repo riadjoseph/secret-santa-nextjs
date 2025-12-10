@@ -11,6 +11,10 @@ export type Participant = {
   gift_preference_preset: 'sponsored-tool' | 'personal-audit' | 'learning-resources' | 'surprise-me' | null // Quick preset
   expertise_level: 'Junior' | 'Mid' | 'Senior'
   wishlist: Array<{ name: string; url?: string }> // URL is optional now
+  avatar_url: string | null // Profile picture from LinkedIn
+  headline: string | null // Professional headline from LinkedIn
+  location: string | null // Location from LinkedIn
+  raw_user_metadata: Record<string, any> | null // Raw LinkedIn OIDC data
   created_at: string
   updated_at: string
 }

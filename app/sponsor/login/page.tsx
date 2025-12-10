@@ -122,7 +122,7 @@ export default function SponsorLoginPage() {
           {/* Help Text */}
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
-              Need help? Contact the administrator
+              Need help? Contact <a href="https://www.linkedin.com/in/riadjoseph/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium">Riad Joseph</a> (the admin dude) on <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline">sponsors@seokringle.com</a>
             </p>
           </div>
         </div>
