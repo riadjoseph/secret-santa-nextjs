@@ -27,7 +27,21 @@ export default function RootLayout({
           </main>
 
           <footer className="bg-gray-100 py-4 px-6 text-center text-sm text-gray-600">
-            <p className="mb-2">SEO Kringle 2025 - Community Gift Exchange</p>
+            <p className="mb-2">
+              SEO Kringle 2025 - Community Gift Exchange
+            </p>
+            <p className="mb-2">
+              Made with ❤️ by{' '}
+              <a
+                href="https://www.linkedin.com/in/riadjoseph/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-600 hover:underline font-medium"
+              >
+                Riad Joseph
+              </a>
+              {' '}+ Claude Code, ChatGPT and Gemini
+            </p>
             <p>
               <a href="/privacy-policy" className="text-blue-600 hover:underline">
                 Privacy Policy
