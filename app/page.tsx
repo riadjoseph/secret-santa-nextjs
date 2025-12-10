@@ -19,6 +19,8 @@ export default function LoginPage() {
   const [gifts, setGifts] = useState<GiftPreview[]>([])
   const [sponsors, setSponsors] = useState<Sponsor[]>([])
   const [timeUntilReveal, setTimeUntilReveal] = useState(getTimeUntilReveal())
+  const [participantCount, setParticipantCount] = useState(0)
+  const [sponsorCount, setSponsorCount] = useState(0)
   const router = useRouter()
   const supabase = createClient()
 
@@ -34,6 +36,7 @@ export default function LoginPage() {
   useEffect(() => {
     loadGiftPreviews()
     loadSponsors()
+    loadCounts()
 
     // Check for auth error in URL
     const searchParams = new URLSearchParams(window.location.search)
@@ -46,6 +49,26 @@ export default function LoginPage() {
       })
       // Clean URL
       window.history.replaceState({}, '', '/')
+    }
+
+    // Set up real-time subscription for counts
+    const participantsChannel = supabase
+      .channel('participants-count')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'participants' }, () => {
+        loadCounts()
+      })
+      .subscribe()
+
+    const sponsorsChannel = supabase
+      .channel('sponsors-count')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'sponsors' }, () => {
+        loadCounts()
+      })
+      .subscribe()
+
+    return () => {
+      supabase.removeChannel(participantsChannel)
+      supabase.removeChannel(sponsorsChannel)
     }
   }, [])
 
@@ -79,6 +102,22 @@ export default function LoginPage() {
       .order('tier', { ascending: true })
 
     if (data) setSponsors(data)
+  }
+
+  const loadCounts = async () => {
+    // Count total participants
+    const { count: participantsTotal } = await supabase
+      .from('participants')
+      .select('*', { count: 'exact', head: true })
+
+    // Count approved sponsors
+    const { count: sponsorsTotal } = await supabase
+      .from('sponsors')
+      .select('*', { count: 'exact', head: true })
+      .eq('approval_status', 'approved')
+
+    if (participantsTotal !== null) setParticipantCount(participantsTotal)
+    if (sponsorsTotal !== null) setSponsorCount(sponsorsTotal)
   }
 
   const handleLinkedInLogin = async () => {
@@ -130,7 +169,7 @@ export default function LoginPage() {
         </p>
 
         {/* CTA Button - Above the Fold */}
-        <div className="max-w-md mx-auto">
+        <div className="max-w-md mx-auto mb-6">
           <button
             onClick={handleLinkedInLogin}
             disabled={loading}
@@ -147,6 +186,28 @@ export default function LoginPage() {
               </>
             )}
           </button>
+        </div>
+
+        {/* Live Stats Counter */}
+        <div className="max-w-2xl mx-auto">
+          <div className="grid grid-cols-2 gap-4">
+            <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-200 shadow-sm">
+              <div className="text-3xl font-bold text-green-700 mb-1">
+                {participantCount}
+              </div>
+              <div className="text-sm text-gray-700 font-medium">
+                🎁 Participants Joined
+              </div>
+            </div>
+            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-200 shadow-sm">
+              <div className="text-3xl font-bold text-blue-700 mb-1">
+                {sponsorCount}
+              </div>
+              <div className="text-sm text-gray-700 font-medium">
+                🎄 Generous Sponsors
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
