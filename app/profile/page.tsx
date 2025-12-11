@@ -813,7 +813,7 @@ export default function ProfilePage() {
           <h2 className="text-xl font-semibold mb-4">2. Your Wishlist (Optional)</h2>
           <p className="text-sm text-gray-600 mb-3">Give your Santa up to 3 gift ideas! This is completely optional.</p>
 
-          {formData.wishlist.map((item, index) => (
+          {(formData.wishlist || [{ name: '', url: '' }, { name: '', url: '' }, { name: '', url: '' }]).map((item, index) => (
             <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-3">
               <div>
                 <label htmlFor={`wishlist-name-${index}`} className="label">
