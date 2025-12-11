@@ -1,10 +1,37 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LogoWithText } from "@/components/Logo";
+import structuredData from "@/public/json-sd.json";
 
 export const metadata: Metadata = {
-  title: "SEO Kringle - Secret Santa",
-  description: "SEO Community Secret Santa Gift Exchange",
+  title: "SEO Kringle – Secret Santa for the SEO Community",
+  description:
+    "SEO Kringle is a Secret Santa for the SEO community. Sign up with LinkedIn, get matched with another SEO, and exchange gifts sponsored by SEO tools and services.",
+  metadataBase: new URL("https://seokringle.com"),
+  openGraph: {
+    type: "website",
+    url: "https://seokringle.com/",
+    siteName: "SEO Kringle",
+    locale: "en_US",
+    title: "SEO Kringle – Secret Santa for the SEO Community",
+    description:
+      "Join the SEO community Secret Santa: sign up with LinkedIn, share your wishlist, and exchange gifts sponsored by generous SEO tools and services.",
+    images: [
+      {
+        url: "https://seokringle.com/seo-kringle-lady-elf-with-gift.png",
+        width: 1200,
+        height: 630,
+        alt: "SEO Kringle – SEO Community Secret Santa gift exchange",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "SEO Kringle – Secret Santa for the SEO Community",
+    description:
+      "Secret Santa for SEOs: sign up with LinkedIn, get matched, and swap gifts sponsored by SEO tools. Open to everyone, beyond any religion.",
+    images: ["https://seokringle.com/seo-kringle-myth-figure-with-gift.png"],
+  },
 };
 
 export default function RootLayout({
@@ -20,6 +47,12 @@ export default function RootLayout({
         <link
           href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Playfair+Display:wght@400;600;700&display=swap"
           rel="stylesheet"
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(structuredData),
+          }}
         />
       </head>
       <body className="antialiased font-sans">
