@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-server'
 import { cookies } from 'next/headers'
 
 const SESSION_COOKIE_NAME = 'sponsor_session'
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
 
     // Authenticate sponsor using database function
     const { data: authResult, error: authError } = await supabase
@@ -120,7 +120,7 @@ export async function DELETE(request: NextRequest) {
     const sessionToken = cookieStore.get(SESSION_COOKIE_NAME)?.value
 
     if (sessionToken) {
-      const supabase = await createServerSupabaseClient()
+      const supabase = createAdminClient()
 
       // Delete session from database
       await supabase
