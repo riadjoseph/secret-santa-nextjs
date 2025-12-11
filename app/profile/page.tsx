@@ -138,20 +138,33 @@ export default function ProfilePage() {
 
       if (profileData) {
         setProfile(profileData)
+
+        // Ensure wishlist is always an array with exactly 3 items
+        let wishlist = [
+          { name: '', url: '' },
+          { name: '', url: '' },
+          { name: '', url: '' },
+        ]
+
+        if (profileData.wishlist && Array.isArray(profileData.wishlist)) {
+          wishlist = [
+            profileData.wishlist[0] || { name: '', url: '' },
+            profileData.wishlist[1] || { name: '', url: '' },
+            profileData.wishlist[2] || { name: '', url: '' },
+          ]
+        }
+
         setFormData({
           name: profileData.name || '',
           email: profileData.email || user.email || '',
           linkedin_url: profileData.linkedin_url || '',
           website_url: profileData.website_url || '',
           expertise_level: profileData.expertise_level || 'Mid',
-          wishlist: profileData.wishlist || [
-            { name: '', url: '' },
-            { name: '', url: '' },
-            { name: '', url: '' },
-          ],
+          wishlist,
         })
       } else {
         // Set email from user auth if no profile exists yet
+        // Keep the default wishlist from initial state
         setFormData(prev => ({ ...prev, email: user.email || '' }))
       }
 
