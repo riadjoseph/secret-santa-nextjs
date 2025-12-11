@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
 import { verifySponsor, ApiResponse } from '@/lib/auth-utils'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-server'
 import { validateGift } from '@/lib/validation'
 
 /**
@@ -11,7 +11,7 @@ export async function GET() {
   try {
     const { sponsor } = await verifySponsor()
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('gifts')
       .select(`
@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
     const { data, error } = await supabase
       .from('gifts')
       .insert(validation.data)

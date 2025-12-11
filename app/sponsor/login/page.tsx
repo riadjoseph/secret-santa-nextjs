@@ -31,8 +31,8 @@ export default function SponsorLoginPage() {
         throw new Error(data.error || 'Login failed')
       }
 
-      // Redirect to admin dashboard on successful login
-      router.push('/admin')
+      // Redirect to sponsor dashboard on successful login
+      router.push('/sponsor')
       router.refresh()
     } catch (err: any) {
       setError(err.message || 'Login failed. Please check your credentials.')

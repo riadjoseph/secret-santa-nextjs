@@ -1,5 +1,5 @@
 import { verifySponsor, ApiResponse } from '@/lib/auth-utils'
-import { createServerSupabaseClient } from '@/lib/supabase-server'
+import { createAdminClient } from '@/lib/supabase-server'
 
 /**
  * GET /api/sponsor/analytics
@@ -9,7 +9,7 @@ export async function GET() {
   try {
     const { sponsor } = await verifySponsor()
 
-    const supabase = await createServerSupabaseClient()
+    const supabase = createAdminClient()
 
     // Get gift analytics using the database function
     const { data: analytics, error: analyticsError } = await supabase
@@ -47,6 +47,7 @@ export async function GET() {
     return ApiResponse.success({
       analytics,
       assignments: assignments || [],
+      sponsor,
     })
   } catch (error: any) {
     if (error.message === 'Authentication required') {

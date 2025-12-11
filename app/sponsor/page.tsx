@@ -56,32 +56,29 @@ export default function SponsorDashboard() {
   }, [])
 
   const checkAuth = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
-      router.push('/')
+    // Check if sponsor session exists by trying to load gifts
+    // The API will validate the session cookie
+    const res = await fetch('/api/sponsor/gifts')
+
+    if (!res.ok) {
+      // No valid session, redirect to login
+      router.push('/sponsor/login')
       return
     }
 
-    // Get sponsor record
-    const { data: sponsorData } = await supabase
-      .from('sponsors')
-      .select('*')
-      .eq('user_id', user.id)
-      .single()
+    // Session is valid, load sponsor data
+    const { data: giftsData } = await res.json()
 
-    if (!sponsorData) {
-      setError('No sponsor account found. Please contact an administrator.')
-      setLoading(false)
-      return
+    // The gifts response includes sponsor info, extract it
+    // Or make a separate call to get sponsor details
+    const analyticsRes = await fetch('/api/sponsor/analytics')
+    if (analyticsRes.ok) {
+      const { data: analyticsData } = await analyticsRes.json()
+      if (analyticsData.sponsor) {
+        setSponsor(analyticsData.sponsor)
+      }
     }
 
-    if (sponsorData.approval_status !== 'approved') {
-      setError(`Your sponsor account is ${sponsorData.approval_status}. Please wait for admin approval.`)
-      setLoading(false)
-      return
-    }
-
-    setSponsor(sponsorData)
     setLoading(false)
   }
 
@@ -309,8 +306,8 @@ export default function SponsorDashboard() {
                   <label className="label">Value (USD)</label>
                   <input
                     type="number"
-                    value={formData.value_usd}
-                    onChange={e => setFormData({ ...formData, value_usd: parseInt(e.target.value) })}
+                    value={formData.value_usd || 0}
+                    onChange={e => setFormData({ ...formData, value_usd: parseInt(e.target.value) || 0 })}
                     className="input"
                     min="0"
                   />

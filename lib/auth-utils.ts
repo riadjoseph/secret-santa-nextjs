@@ -102,23 +102,42 @@ export async function getSponsorForUser() {
 
 /**
  * Verify current user is an approved sponsor
+ * Checks for sponsor session cookie (not Supabase Auth)
  * Throws error if not authenticated, not a sponsor, or not approved
  */
 export async function verifySponsor() {
-  const user = await getCurrentUser()
+  // Import cookies at runtime to avoid edge runtime issues
+  const { cookies } = await import('next/headers')
+  const cookieStore = await cookies()
+  const sessionToken = cookieStore.get('sponsor_session')?.value
 
-  if (!user) {
+  if (!sessionToken) {
     throw new Error('Authentication required')
   }
 
-  const supabase = await createServerSupabaseClient()
-  const { data: sponsor, error } = await supabase
-    .from('sponsors')
-    .select('*')
-    .eq('user_id', user.id)
+  // Import admin client to bypass RLS
+  const { createAdminClient } = await import('./supabase-server')
+  const supabase = createAdminClient()
+
+  // Validate session token
+  const { data: session, error: sessionError } = await supabase
+    .from('sponsor_sessions')
+    .select('*, sponsor:sponsors(*)')
+    .eq('session_token', sessionToken)
     .single()
 
-  if (error || !sponsor) {
+  if (sessionError || !session) {
+    throw new Error('Authentication required')
+  }
+
+  // Check if session is expired
+  if (new Date(session.expires_at) < new Date()) {
+    throw new Error('Authentication required')
+  }
+
+  const sponsor = session.sponsor
+
+  if (!sponsor) {
     throw new Error('Sponsor account required')
   }
 
@@ -126,7 +145,7 @@ export async function verifySponsor() {
     throw new Error('Sponsor account pending approval')
   }
 
-  return { user, sponsor }
+  return { sponsor }
 }
 
 /**

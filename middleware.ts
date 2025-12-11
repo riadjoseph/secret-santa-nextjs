@@ -34,11 +34,19 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
+  // Check for sponsor session cookie
+  const sponsorSession = request.cookies.get('sponsor_session')
+
   // Protected routes (exclude login pages)
-  const protectedPaths = ['/profile', '/admin', '/sponsor']
+  const protectedPaths = ['/profile', '/admin']
+  const sponsorPaths = ['/sponsor']
   const publicPaths = ['/sponsor/login'] // Login pages should be accessible
 
   const isProtectedPath = protectedPaths.some((path) =>
+    request.nextUrl.pathname.startsWith(path)
+  )
+
+  const isSponsorPath = sponsorPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path)
   )
 
@@ -50,6 +58,13 @@ export async function middleware(request: NextRequest) {
   if (isProtectedPath && !isPublicPath && !user) {
     const url = request.nextUrl.clone()
     url.pathname = '/'
+    return NextResponse.redirect(url)
+  }
+
+  // Redirect to sponsor login if accessing sponsor route without sponsor session
+  if (isSponsorPath && !isPublicPath && !sponsorSession) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/sponsor/login'
     return NextResponse.redirect(url)
   }
 
