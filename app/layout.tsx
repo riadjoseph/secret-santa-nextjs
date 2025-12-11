@@ -1,7 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LogoWithText } from "@/components/Logo";
-import structuredData from "@/public/json-sd.json";
+import fs from "fs";
+import path from "path";
+
+const structuredData = JSON.parse(
+  fs.readFileSync(path.join(process.cwd(), "public", "json-sd.json"), "utf-8")
+);
 
 export const metadata: Metadata = {
   title: "SEO Kringle – Secret Santa for the SEO Community",
