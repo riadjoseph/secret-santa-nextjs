@@ -1,12 +1,98 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { LogoWithText } from "@/components/Logo";
-import fs from "fs";
-import path from "path";
 
-const structuredData = JSON.parse(
-  fs.readFileSync(path.join(process.cwd(), "public", "json-sd.json"), "utf-8")
-);
+const structuredData = {
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "name": "SEO Kringle",
+      "url": "https://seokringle.com",
+      "description": "SEO Kringle is the SEO community's own Secret Santa exchange, created to bring together SEOs from all backgrounds through small, meaningful gifts and festive fun.",
+      "sameAs": [
+        "https://www.linkedin.com/in/riadjoseph/",
+        "https://en.wikipedia.org/wiki/Secret_Santa",
+        "https://en.wikipedia.org/wiki/Kris_Kringle",
+        "https://en.wikipedia.org/wiki/Gift",
+        "https://en.wikipedia.org/wiki/Search_engine_optimization"
+      ],
+      "mainEntityOfPage": "https://seokringle.com"
+    },
+    {
+      "@type": "Event",
+      "name": "SEO Kringle Secret Santa Exchange",
+      "eventAttendanceMode": "https://schema.org/OnlineEventAttendanceMode",
+      "eventStatus": "https://schema.org/EventScheduled",
+      "location": {
+        "@type": "VirtualLocation",
+        "url": "https://seokringle.com"
+      },
+      "organizer": {
+        "@type": "Organization",
+        "name": "SEO Kringle",
+        "url": "https://seokringle.com"
+      },
+      "description": "Global gift-exchange for SEOs: sign up, get matched, send a small surprise, and receive a gift from another participant. Discover new tools, meet peers, and share #SEOKringle joy.",
+      "potentialAction": {
+        "@type": "JoinAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://seokringle.com/",
+          "actionApplication": {
+            "@type": "SoftwareApplication",
+            "name": "LinkedIn OAuth",
+            "applicationCategory": "SocialNetworkingApplication",
+            "operatingSystem": "All"
+          }
+        },
+        "description": "Sign up on SEOkringle.com with LinkedIn, receive your match, send a gift, and share your reveal with #SEOKringle."
+      },
+      "about": [
+        { "@id": "https://en.wikipedia.org/wiki/Secret_Santa" },
+        { "@id": "https://en.wikipedia.org/wiki/Kris_Kringle" },
+        { "@id": "https://en.wikipedia.org/wiki/Gift" },
+        { "@id": "https://en.wikipedia.org/wiki/Search_engine_optimization" }
+      ],
+      "offers": [
+        {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "description": "Sponsor-provided tools, swag, discounts, and digital goodies for participants to give."
+        }
+      ],
+      "applicationCategory": "CommunityEventApplication",
+      "operatingSystem": "Any",
+      "inLanguage": "en"
+    },
+    {
+      "@id": "https://en.wikipedia.org/wiki/Secret_Santa",
+      "@type": "Thing",
+      "name": "Secret Santa",
+      "sameAs": ["https://en.wikipedia.org/wiki/Secret_Santa"]
+    },
+    {
+      "@id": "https://en.wikipedia.org/wiki/Kris_Kringle",
+      "@type": "Thing",
+      "name": "Kringle",
+      "sameAs": ["https://en.wikipedia.org/wiki/Kris_Kringle"]
+    },
+    {
+      "@id": "https://en.wikipedia.org/wiki/Gift",
+      "@type": "Thing",
+      "name": "Gifting",
+      "sameAs": ["https://en.wikipedia.org/wiki/Gift"]
+    },
+    {
+      "@id": "https://en.wikipedia.org/wiki/Search_engine_optimization",
+      "@type": "Thing",
+      "name": "SEO",
+      "sameAs": ["https://en.wikipedia.org/wiki/Search_engine_optimization"]
+    }
+  ]
+};
 
 export const metadata: Metadata = {
   title: "SEO Kringle – Secret Santa for the SEO Community",
