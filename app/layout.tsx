@@ -168,7 +168,7 @@ export default function RootLayout({
                 rel="noopener noreferrer"
                 className="text-blue-600 hover:underline font-medium"
               >
-                Riad Joseph
+                this dude
               </a>{" "}
               + Claude Code, ChatGPT and Gemini
             </p>

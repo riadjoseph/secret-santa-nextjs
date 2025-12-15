@@ -392,29 +392,41 @@ export default function LoginPage() {
           <h2 className="text-4xl font-bold text-center mb-2 font-display">🎁 Why Not Sponsor?</h2>
           <p className="text-center text-gray-700 mb-6">
 🧦 Share some cheer with the SEO community and spotlight your tools or services.
-You don’t need to go all out — a few meaningful gifts go a long way. 🥨          </p>
+You don't need to go all out — a few meaningful gifts go a long way. 🥨          </p>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="bg-white rounded-lg p-6 flex flex-col h-full shadow-md border-2 border-green-200">
-              <h3 className="font-bold mb-3 text-lg">🎄 Sponsor Login</h3>
+              <h3 className="font-bold mb-3 text-lg">🎯 Step 1: Get Your Credentials</h3>
               <p className="text-gray-700 mb-3">
-                If you're an approved sponsor, use the magic link login below. Once logged in, you'll have access to your sponsor dashboard where you can:
+                Interested in becoming a sponsor? Get in touch to receive your login credentials (it's free of charge — you're already very generous)! 🎁
               </p>
-              <ul className="text-gray-700 list-disc list-inside space-y-2 ml-2 flex-grow">
-                <li>🎁 Add and manage your gift offerings</li>
-                <li>📊 View analytics on gift distribution and redemption</li>
-                <li>❤️ Track engagement with your contributions</li>
-              </ul>
+              <div className="text-gray-700 space-y-2 flex-grow">
+                <p>Contact me via:</p>
+                <ul className="list-disc list-inside ml-2 space-y-1">
+                  <li>
+                    Email: <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a>
+                  </li>
+                  <p className="text-center font-semibold">OR</p>
+                  <li>
+                    LinkedIn: <a href="https://www.linkedin.com/in/riadjoseph/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-semibold">Message Riad Joseph</a>
+                  </li>
+                </ul>
+              </div>
             </div>
             <div className="bg-white rounded-lg p-6 flex flex-col h-full shadow-md border-2 border-red-200">
               <h3 className="text-lg font-bold text-gray-900 mb-3">
-                🧦 Interested in becoming a sponsor?
+                🎄 Step 2: Manage Your Sponsorship
               </h3>
-              <p className="text-gray-700 mb-3 flex-grow">
-                Contact me at <a href="mailto:sponsors@seokringle.com" className="text-blue-600 hover:underline font-semibold">sponsors@seokringle.com</a> to get started; it is free of charge obviously (you are already very generous)! 🎁
+              <p className="text-gray-700 mb-3">
+                Once you receive your username and password credentials, login at{' '}
+                <a href="https://seokringle.com/sponsor/login" className="text-blue-600 hover:underline font-semibold">
+                  seokringle.com/sponsor/login
+                </a>
+                {' '}to access your sponsor dashboard where you can:
               </p>
-              <p className="text-gray-600">
-                🎄 You will receive your dedicated login where you will manage your gifts and company listing.
-              </p>
+              <ul className="text-gray-700 list-disc list-inside space-y-2 ml-2 flex-grow">
+                <li>🏢 Update your company promotional details</li>
+                <li>❤️ Track engagement with your contributions</li>
+              </ul>
             </div>
           </div>
         </div>
